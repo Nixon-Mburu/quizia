@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.CheckBox?>
-<AnchorPane fx:id="root" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.quizia.frontend.controller.RegisterRoomController" style="-fx-background-color: white;">
+<AnchorPane fx:id="root" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.quizia.frontend.controller.RegisterRoomController" stylesheets="@../styles/app.css,@../styles/register_room.css" styleClass="root" style="-fx-background-color: white;">
     <children>
         <Label layoutX="40" layoutY="40" text="Enter Room Name:" />
         <TextField fx:id="roomNameField" layoutX="180" layoutY="35" prefWidth="200" />
@@ -23,7 +23,7 @@
             <CheckBox fx:id="topicHistory" text="History &amp; Politics" />
         </VBox>
 
-        <Button fx:id="registerButton" layoutX="180" layoutY="320" text="Register Room" />
-        <Button fx:id="backButton" layoutX="40" layoutY="380" text="Back" />
+        <Button fx:id="registerButton" layoutX="180" layoutY="320" text="Register Room" styleClass="primary" />
+        <Button fx:id="backButton" layoutX="40" layoutY="380" text="Back" styleClass="ghost compact" />
     </children>
 </AnchorPane>

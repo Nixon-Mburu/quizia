@@ -6,7 +6,7 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.layout.HBox?>
-<AnchorPane fx:id="root" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.quizia.frontend.controller.QuestionsController" style="-fx-background-color: white;">
+<AnchorPane fx:id="root" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.quizia.frontend.controller.QuestionsController" stylesheets="@../styles/app.css,@../styles/questions.css" styleClass="root" style="-fx-background-color: white;">
     <children>
         <VBox layoutX="20" layoutY="20" spacing="10.0" AnchorPane.leftAnchor="20" AnchorPane.topAnchor="20">
             <Label fx:id="roomLabel" text="Room: -" />
@@ -14,15 +14,15 @@
             <VBox spacing="8.0">
                 <Label fx:id="questionText" text="Question will appear here" wrapText="true" prefWidth="600" />
                 <VBox spacing="6.0">
-                    <RadioButton fx:id="optA" toggleGroup="$answers" text="Option A" />
-                    <RadioButton fx:id="optB" toggleGroup="$answers" text="Option B" />
-                    <RadioButton fx:id="optC" toggleGroup="$answers" text="Option C" />
-                    <RadioButton fx:id="optD" toggleGroup="$answers" text="Option D" />
+                        <RadioButton fx:id="optA" text="Option A" styleClass="option-button" />
+                        <RadioButton fx:id="optB" text="Option B" styleClass="option-button" />
+                        <RadioButton fx:id="optC" text="Option C" styleClass="option-button" />
+                        <RadioButton fx:id="optD" text="Option D" styleClass="option-button" />
                 </VBox>
                 <HBox spacing="8.0">
-                    <Button fx:id="prevBtn" text="Previous" onAction="#onPrevious" />
-                    <Button fx:id="nextBtn" text="Next" onAction="#onNext" />
-                    <Button fx:id="submitBtn" text="Submit" onAction="#onSubmit" />
+                    <Button fx:id="prevBtn" text="Previous" onAction="#onPrevious" styleClass="table-action compact" />
+                    <Button fx:id="nextBtn" text="Next" onAction="#onNext" styleClass="primary compact" />
+                    <Button fx:id="submitBtn" text="Submit" onAction="#onSubmit" styleClass="start-button compact" />
                 </HBox>
             </VBox>
             <Button text="Back to Topics" onAction="#onBackToTopics" />

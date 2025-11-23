@@ -1,0 +1,15 @@
+/* Pick topic specific styles */
+.root { -fx-font-family: 'Cambria', serif; }
+
+.hyperlink, .link-button { 
+  -fx-text-fill: #2563EB;
+  -fx-underline: false;
+  -fx-font-weight: 600;
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+  -fx-cursor: hand;
+}
+
+.hyperlink:hover, .link-button:hover { -fx-text-fill: #1E40AF; -fx-underline: true; }
+
+.ghost { -fx-background-color: transparent; -fx-text-fill: #64748B; }

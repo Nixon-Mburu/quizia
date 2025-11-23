@@ -4,6 +4,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -56,6 +58,26 @@ public class JoinRoomController {
 
         TableColumn<Room, String> memberNamesCol = new TableColumn<>("Member Names");
         memberNamesCol.setCellValueFactory(new PropertyValueFactory<>("memberNames"));
+        // render member names as chips
+        memberNamesCol.setCellFactory(col -> new TableCell<Room, String>() {
+            private final FlowPane pane = new FlowPane();
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                pane.getChildren().clear();
+                if (empty || item == null || item.trim().isEmpty()) {
+                    setGraphic(null);
+                } else {
+                    String[] parts = item.split(",");
+                    for (String p : parts) {
+                        Label lbl = new Label(p.trim());
+                        lbl.getStyleClass().addAll("member-chip");
+                        pane.getChildren().add(lbl);
+                    }
+                    setGraphic(pane);
+                }
+            }
+        });
 
         TableColumn<Room, Void> joinCol = new TableColumn<>("Join");
         joinCol.setCellFactory(new Callback<TableColumn<Room, Void>, TableCell<Room, Void>>() {
@@ -64,6 +86,7 @@ public class JoinRoomController {
                 return new TableCell<Room, Void>() {
                     private final Button btn = new Button("Join");
                     {
+                        btn.getStyleClass().addAll("table-action");
                         btn.setOnAction(event -> {
                             Room room = getTableView().getItems().get(getIndex());
                                     handleJoinRoom(room);
@@ -91,6 +114,7 @@ public class JoinRoomController {
                 return new TableCell<Room, Void>() {
                     private final Button btn = new Button("Start Quiz");
                     {
+                        btn.getStyleClass().addAll("start-button");
                         btn.setOnAction(event -> {
                             Room room = getTableView().getItems().get(getIndex());
                             handleStartRoom(room);
@@ -247,15 +271,15 @@ public class JoinRoomController {
                             com.example.quizia.frontend.controller.QuestionsController qc = loader.getController();
                             qc.setRoomInfo(room.getRoomId(), room.getRoomName());
                             qc.setUsername(payload.get("username"));
-                            // choose first topic if available and wait for registrar to start
+                            // choose first topic if available and fetch questions immediately
                             String topic = null;
                             if (room.getTopics() != null && !room.getTopics().isEmpty()) {
                                 String[] parts = room.getTopics().split(",");
                                 if (parts.length > 0) topic = parts[0].trim();
                             }
                             if (topic == null || topic.isEmpty()) topic = "General Knowledge";
-                            qc.setTopicDeferred(topic);
-                            qc.waitForStart(room.getRoomId());
+                            // fetch questions now for participants so they can see randomized questions
+                            qc.setTopic(topic);
                             Stage stage = (Stage) root.getScene().getWindow();
                             stage.setScene(new Scene(page));
                         } catch (IOException ex) {

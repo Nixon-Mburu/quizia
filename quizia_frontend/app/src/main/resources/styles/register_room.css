@@ -1,1 +1,17 @@
+/* Register Room specific styles */
+.root { -fx-font-family: 'Cambria', serif; }
+
+.check-box .box { 
+  -fx-border-color: #CBD5E1;
+  -fx-border-radius: 6px;
+  -fx-background-radius: 6px;
+  -fx-border-width: 2px;
+}
+
+.check-box:selected .box {
+  -fx-background-color: #2563EB;
+  -fx-border-color: #2563EB;
+}
+
+.primary { -fx-background-color: linear-gradient(to bottom, #2563EB, #1E40AF); -fx-text-fill: white; }
 /* Styles for register_room.fxml */

@@ -82,6 +82,7 @@ public class QuestionsController {
         }
 
         // by default fetch immediately (used when registrar starts)
+        logDebug("setTopic called with topic='" + topic + "' -> fetching questions");
         fetchQuestionsForTopic(topic);
     }
 
@@ -140,23 +141,74 @@ public class QuestionsController {
         if (topicLabel != null && topic != null) {
             topicLabel.setText("Topic: " + topic);
         }
+        // ensure radio buttons are in the same ToggleGroup and set click handlers
+        try {
+            optA.setToggleGroup(answersGroup);
+            optB.setToggleGroup(answersGroup);
+            optC.setToggleGroup(answersGroup);
+            optD.setToggleGroup(answersGroup);
+            // when a radio button is clicked, save the selection for current index
+            optA.setOnAction(evt -> saveSelectedForCurrent());
+            optB.setOnAction(evt -> saveSelectedForCurrent());
+            optC.setOnAction(evt -> saveSelectedForCurrent());
+            optD.setOnAction(evt -> saveSelectedForCurrent());
+        } catch (Exception ex) {
+            // defensive: if controls not yet injected, ignore
+        }
+
+        // show placeholder until questions load
+        if (questionText != null && (questions == null || questions.isEmpty())) {
+            questionText.setText("Loading questions...");
+        }
     }
 
     private void fetchQuestionsForTopic(String topic) {
         // run HTTP request off the UI thread
         new Thread(() -> {
             try {
+                logDebug("fetchQuestionsForTopic() starting for topic='" + topic + "'");
                 String encoded = java.net.URLEncoder.encode(topic, java.nio.charset.StandardCharsets.UTF_8);
                 String url = "http://localhost:8081/api/questions?topic=" + encoded + "&limit=30";
+                logDebug("GET " + url);
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest req = HttpRequest.newBuilder()
                         .uri(URI.create(url))
+                        .header("Accept", "application/json")
                         .GET()
                         .build();
                 HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
+                logDebug("response status: " + resp.statusCode());
                 if (resp.statusCode() == 200) {
+                    String body = resp.body();
+                    logDebug("response length: " + (body == null ? 0 : body.length()));
                     ObjectMapper mapper = new ObjectMapper();
-                    List<Question> qlist = mapper.readValue(resp.body(), new TypeReference<List<Question>>(){});
+                    List<Question> qlist = null;
+                    try {
+                        qlist = mapper.readValue(body, new TypeReference<List<Question>>(){});
+                        // randomize question order client-side to ensure different order per user
+                        try {
+                            java.util.Collections.shuffle(qlist);
+                        } catch (Exception ex) {
+                            // ignore shuffle failures
+                        }
+                        System.out.println("[QuestionsController] parsed questions count: " + (qlist == null ? 0 : qlist.size()));
+                    } catch (Exception parseEx) {
+                        parseEx.printStackTrace();
+                        logDebug("JSON parse error: " + parseEx.getClass().getSimpleName() + ": " + parseEx.getMessage());
+                        final String raw = body == null ? "<empty>" : body;
+                        Platform.runLater(() -> {
+                            questionText.setText("Failed to parse questions JSON. Raw response:\n" + raw);
+                        });
+                        return;
+                    }
+                    if (qlist == null || qlist.isEmpty()) {
+                        final String raw = body == null ? "<empty>" : body;
+                        Platform.runLater(() -> {
+                            questionText.setText("No questions returned for topic: " + topic + "\nRaw response:\n" + raw);
+                        });
+                        return;
+                    }
+                    logDebug("parsed questions count: " + qlist.size());
                     questions.clear();
                     questions.addAll(qlist);
                     selectedAnswers.clear();
@@ -166,12 +218,35 @@ public class QuestionsController {
                     quizStartTime = System.currentTimeMillis();
                     Platform.runLater(() -> showQuestion(currentIndex));
                 } else {
-                    System.err.println("Failed to fetch questions: " + resp.statusCode());
+                    logDebug("Failed to fetch questions: status=" + resp.statusCode());
+                    final int status = resp.statusCode();
+                    final String body = resp.body();
+                    Platform.runLater(() -> {
+                        questionText.setText("Failed to fetch questions (status=" + status + ")\nRaw response:\n" + (body == null ? "<empty>" : body));
+                    });
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                logDebug("Exception during fetch: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+                final String msg = e.getClass().getSimpleName() + ": " + e.getMessage();
+                Platform.runLater(() -> {
+                    if (questionText != null) questionText.setText("Error fetching questions: " + msg);
+                });
             }
         }).start();
+    }
+
+    // Append lightweight debug messages to a temp file so they are visible even when console output
+    // isn't captured by the Gradle runner. Non-critical — failures are swallowed.
+    private void logDebug(String msg) {
+        try {
+            String line = java.time.Instant.now().toString() + " " + msg + "\n";
+            java.nio.file.Path p = java.nio.file.Path.of("/tmp/quizia_frontend_debug.log");
+            java.nio.file.Files.write(p, line.getBytes(java.nio.charset.StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+        } catch (Throwable t) {
+            // ignore
+        }
+        System.out.println("[QuestionsController] " + msg);
     }
 
     private void showQuestion(int index) {
@@ -182,10 +257,6 @@ public class QuestionsController {
         optB.setText(q.getOptionB() == null ? "" : q.getOptionB());
         optC.setText(q.getOptionC() == null ? "" : q.getOptionC());
         optD.setText(q.getOptionD() == null ? "" : q.getOptionD());
-        optA.setToggleGroup(answersGroup);
-        optB.setToggleGroup(answersGroup);
-        optC.setToggleGroup(answersGroup);
-        optD.setToggleGroup(answersGroup);
         // restore previously selected answer if any
         String sel = selectedAnswers.get(index);
         answersGroup.selectToggle(null);

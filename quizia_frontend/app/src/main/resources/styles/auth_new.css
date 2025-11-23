@@ -1,3 +1,39 @@
+/* Auth page specific styles */
+.root { -fx-font-family: 'Cambria', serif; }
+
+.logo-label {
+  -fx-font-size: 42px;
+  -fx-font-weight: 900;
+  -fx-text-fill: linear-gradient(to right, #0F172A, #1E40AF, #2563EB);
+  -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.3), 12, 0, 0, 4);
+}
+
+.auth-card {
+  -fx-background-color: linear-gradient(to bottom right, #FFFFFF, #FFF7ED, #FFEDD5);
+  -fx-padding: 40px;
+  -fx-background-radius: 20px;
+  -fx-effect: dropshadow(gaussian, rgba(16, 24, 40, 0.1), 32, 0, 0, 12);
+  -fx-border-color: rgba(251, 146, 60, 0.2);
+  -fx-border-width: 1px;
+  -fx-border-radius: 20px;
+}
+
+.username-field {
+  -fx-font-size: 15px;
+  -fx-pref-width: 360px;
+  -fx-pref-height: 48px;
+}
+
+.link-button, .hyperlink {
+  -fx-text-fill: #2563EB;
+  -fx-underline: false;
+  -fx-font-weight: 600;
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+  -fx-cursor: hand;
+}
+
+.link-button:hover, .hyperlink:hover { -fx-text-fill: #1E40AF; -fx-underline: true; }
 /* Global font */
 @font-face {
 	font-family: 'ClimateCrisis';

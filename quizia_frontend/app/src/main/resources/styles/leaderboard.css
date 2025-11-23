@@ -1,1 +1,28 @@
-/* Styles for leaderboard.fxml */
+/* Leaderboard specific styles */
+.root { -fx-font-family: 'Cambria', serif; }
+
+.leaderboard-row {
+  -fx-padding: 16px 20px;
+  -fx-background-radius: 12px;
+  -fx-border-width: 2px;
+  -fx-border-radius: 12px;
+}
+
+.leaderboard-row.top1 { 
+  -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #FEF3C7, #FDE68A, #FCD34D);
+  -fx-border-color: #F59E0B;
+}
+
+.leaderboard-row.top2 { 
+  -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #F1F5F9, #E2E8F0, #CBD5E1);
+  -fx-border-color: #94A3B8;
+}
+
+.leaderboard-row.top3 { 
+  -fx-background-color: linear-gradient(from 0% 0% to 100% 0%, #FED7AA, #FDBA74, #FB923C);
+  -fx-border-color: #F97316;
+}
+
+.leaderboard-row:hover {
+  -fx-translate-y: -2px;
+}
