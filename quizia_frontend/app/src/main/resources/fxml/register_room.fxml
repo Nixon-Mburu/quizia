@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.CheckBox?>
+<AnchorPane fx:id="root" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.quizia.frontend.controller.RegisterRoomController" style="-fx-background-color: white;">
+    <children>
+        <Label layoutX="40" layoutY="40" text="Enter Room Name:" />
+        <TextField fx:id="roomNameField" layoutX="180" layoutY="35" prefWidth="200" />
+        <Label layoutX="40" layoutY="90" text="Enter Room ID:" />
+        <TextField fx:id="roomIdField" layoutX="180" layoutY="85" prefWidth="200" />
+
+        <Label layoutX="40" layoutY="130" text="Select Topics for this Room:" />
+        <VBox layoutX="180" layoutY="120" spacing="6.0">
+            <CheckBox fx:id="topicGeneral" text="General Knowledge" />
+            <CheckBox fx:id="topicScience" text="Science &amp; Technology" />
+            <CheckBox fx:id="topicPop" text="Pop Culture &amp; Entertainment" />
+            <CheckBox fx:id="topicGeo" text="Geography" />
+            <CheckBox fx:id="topicSports" text="Sports" />
+            <CheckBox fx:id="topicHistory" text="History &amp; Politics" />
+        </VBox>
+
+        <Button fx:id="registerButton" layoutX="180" layoutY="320" text="Register Room" />
+        <Button fx:id="backButton" layoutX="40" layoutY="380" text="Back" />
+    </children>
+</AnchorPane>

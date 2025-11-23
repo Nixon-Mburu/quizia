@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.*?>
+<AnchorPane fx:id="root" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.quizia.frontend.controller.JoinRoomController" style="-fx-background-color: white;">
+    <children>
+        <TableView fx:id="roomTable" layoutX="20" layoutY="20" prefWidth="600" prefHeight="300">
+            <columns>
+                <TableColumn text="Room ID" prefWidth="100" />
+                <TableColumn text="Room Name" prefWidth="120" />
+                <TableColumn text="Member Number" prefWidth="120" />
+                <TableColumn text="Member Names" prefWidth="180" />
+                <TableColumn text="Join" prefWidth="80" />
+            </columns>
+        </TableView>
+        <Button fx:id="backButton" layoutX="40" layoutY="340" text="Back" />
+    </children>
+</AnchorPane>
