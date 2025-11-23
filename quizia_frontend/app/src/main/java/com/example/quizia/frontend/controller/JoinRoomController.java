@@ -37,6 +37,9 @@ public class JoinRoomController {
     private Button backButton;
 
     @FXML
+    private Button startButton;
+
+    @FXML
     private AnchorPane root;
 
     @FXML
@@ -119,6 +122,30 @@ public class JoinRoomController {
         roomTable.getColumns().add(startCol);
         // load rooms from backend
         fetchRoomsFromBackend();
+        // start button action - act on selected row
+        if (startButton != null) {
+            startButton.setOnAction(ev -> {
+                Room sel = roomTable.getSelectionModel().getSelectedItem();
+                if (sel != null) handleStartRoom(sel);
+            });
+            startButton.setVisible(false);
+            startButton.setManaged(false);
+        }
+        // show/hide start button depending on selection and registrar
+        roomTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
+            try {
+                java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(getClass());
+                String currentUser = prefs.get("quizia.username", "");
+                boolean show = false;
+                if (newSel != null) {
+                    show = newSel.getCreatedByUsername() != null && !newSel.getCreatedByUsername().isEmpty() && newSel.getCreatedByUsername().equals(currentUser);
+                }
+                if (startButton != null) {
+                    startButton.setVisible(show);
+                    startButton.setManaged(show);
+                }
+            } catch (Exception ex) {}
+        });
         if (backButton != null) {
             backButton.setOnAction(event -> goToAuthPage());
         }
@@ -220,14 +247,15 @@ public class JoinRoomController {
                             com.example.quizia.frontend.controller.QuestionsController qc = loader.getController();
                             qc.setRoomInfo(room.getRoomId(), room.getRoomName());
                             qc.setUsername(payload.get("username"));
-                            // choose first topic if available
+                            // choose first topic if available and wait for registrar to start
                             String topic = null;
                             if (room.getTopics() != null && !room.getTopics().isEmpty()) {
                                 String[] parts = room.getTopics().split(",");
                                 if (parts.length > 0) topic = parts[0].trim();
                             }
                             if (topic == null || topic.isEmpty()) topic = "General Knowledge";
-                            qc.setTopic(topic);
+                            qc.setTopicDeferred(topic);
+                            qc.waitForStart(room.getRoomId());
                             Stage stage = (Stage) root.getScene().getWindow();
                             stage.setScene(new Scene(page));
                         } catch (IOException ex) {
@@ -293,6 +321,7 @@ public class JoinRoomController {
                                 if (parts.length > 0) topic = parts[0].trim();
                             }
                             if (topic == null || topic.isEmpty()) topic = "General Knowledge";
+                            // registrar starts immediately
                             qc.setTopic(topic);
                             Stage stage = (Stage) root.getScene().getWindow();
                             stage.setScene(new Scene(page));

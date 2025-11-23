@@ -81,8 +81,54 @@ public class QuestionsController {
             topicLabel.setText("Topic: " + topic);
         }
 
-        // fetch questions for the topic
+        // by default fetch immediately (used when registrar starts)
         fetchQuestionsForTopic(topic);
+    }
+
+    // set topic without immediately fetching - used for deferred start wait
+    public void setTopicDeferred(String topic) {
+        this.topic = topic;
+        if (topicLabel != null) topicLabel.setText("Topic: " + topic);
+    }
+
+    // Subscribe to server-sent events for the room and start quiz when a 'start' event arrives
+    public void waitForStart(String roomId) {
+        if (roomId == null || roomId.isEmpty()) return;
+        new Thread(() -> {
+            try {
+                String url = "http://localhost:8081/api/rooms/" + java.net.URLEncoder.encode(roomId, java.nio.charset.StandardCharsets.UTF_8) + "/events";
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
+                HttpResponse<java.io.InputStream> resp = client.send(req, HttpResponse.BodyHandlers.ofInputStream());
+                if (resp.statusCode() >= 200 && resp.statusCode() < 300) {
+                    try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.InputStreamReader(resp.body()))) {
+                        String line;
+                        boolean startSeen = false;
+                        while ((line = br.readLine()) != null) {
+                            line = line.trim();
+                            if (line.isEmpty()) continue;
+                            if (line.startsWith("event:")) {
+                                if (line.toLowerCase().contains("start")) {
+                                    startSeen = true;
+                                }
+                            }
+                            if (line.startsWith("data:")) {
+                                if (line.toLowerCase().contains("start") || line.toLowerCase().contains("started")) {
+                                    startSeen = true;
+                                }
+                            }
+                            if (startSeen) {
+                                // fetch questions and begin quiz
+                                if (this.topic != null) fetchQuestionsForTopic(this.topic);
+                                break;
+                            }
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }).start();
     }
 
     @FXML

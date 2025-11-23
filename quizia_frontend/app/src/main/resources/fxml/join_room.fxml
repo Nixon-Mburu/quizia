@@ -13,5 +13,6 @@
             </columns>
         </TableView>
         <Button fx:id="backButton" layoutX="40" layoutY="340" text="Back" />
+        <Button fx:id="startButton" layoutX="140" layoutY="340" text="Start Quiz" />
     </children>
 </AnchorPane>

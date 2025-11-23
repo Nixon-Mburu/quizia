@@ -272,6 +272,109 @@ def test_parallel_joins(room_id: str, base_username: str, count: int = 8) -> boo
     ok("Parallel joins completed without server errors")
     return True
 
+def test_five_joins_and_member_names(room_id: str) -> bool:
+    """Register five users joining the given room and verify their names appear in memberNames."""
+    try:
+        joiners = [f"five_{int(time.time())}_{i}" for i in range(5)]
+        # join sequentially
+        for u in joiners:
+            r = requests.post(f"{BASE}/api/rooms/join", json={"roomId": room_id, "username": u}, timeout=TIMEOUT)
+            if not expect_2xx(r):
+                fail(f"POST /api/rooms/join for {u} returned {r.status_code} body={r.text}")
+                return False
+        time.sleep(0.4)
+        r2 = requests.get(f"{BASE}/api/rooms", timeout=TIMEOUT)
+        if not expect_2xx(r2):
+            fail(f"GET /api/rooms returned {r2.status_code} after five joins")
+            return False
+        found = False
+        for m in r2.json():
+            rid = m.get("roomId") or m.get("room_id")
+            if rid == room_id:
+                found = True
+                mn = m.get("memberNames") or m.get("member_names") or ""
+                missing = [u for u in joiners if u not in mn]
+                if missing:
+                    fail(f"The following joiners not found in memberNames: {missing} (memberNames='{mn}')")
+                    return False
+                # optionally check count
+                mc = m.get("memberCount") or m.get("member_count") or 0
+                try:
+                    if int(mc) < 5:
+                        fail(f"memberCount {mc} is less than 5 after five joins")
+                        return False
+                except Exception:
+                    pass
+                break
+        if not found:
+            fail("Room not found when verifying five joins")
+            return False
+        ok("Five joins recorded and names visible in memberNames column")
+        return True
+    except Exception as ex:
+        fail(f"test_five_joins_and_member_names failed: {ex}")
+        return False
+
+def test_start_broadcast(room_id: str, registrar_user: str) -> bool:
+    """Subscribe to SSE events for the room, then trigger start and verify subscribers receive it."""
+    import requests
+    received = {"ok": False}
+    try:
+        url = f"{BASE}/api/rooms/{requests.utils.quote(room_id)}/events"
+        s = requests.get(url, stream=True, timeout=TIMEOUT)
+        if s.status_code < 200 or s.status_code >= 300:
+            fail(f"Could not subscribe to SSE endpoint: {s.status_code}")
+            return False
+
+        def reader(resp, state):
+            try:
+                for line in resp.iter_lines(decode_unicode=True):
+                    if line is None:
+                        continue
+                    ln = line.strip()
+                    if ln.startswith("data:") and ("start" in ln.lower() or "started" in ln.lower()):
+                        state["ok"] = True
+                        break
+                    if ln.startswith("event:") and "start" in ln.lower():
+                        state["ok"] = True
+                        break
+            except Exception:
+                pass
+
+        t = threading.Thread(target=reader, args=(s, received), daemon=True)
+        t.start()
+
+        # give reader a moment to connect
+        time.sleep(0.2)
+        # trigger start
+        r = requests.post(f"{BASE}/api/rooms/start", json={"roomId": room_id, "username": registrar_user}, timeout=TIMEOUT)
+        if r.status_code >= 500:
+            fail(f"POST /api/rooms/start returned server error {r.status_code}")
+            return False
+
+        # wait up to TIMEOUT seconds for event
+        waited = 0.0
+        interval = 0.1
+        while waited < TIMEOUT:
+            if received.get("ok"):
+                ok("Start broadcast received by SSE subscriber")
+                try:
+                    s.close()
+                except Exception:
+                    pass
+                return True
+            time.sleep(interval)
+            waited += interval
+        fail("Timed out waiting for start event via SSE")
+        try:
+            s.close()
+        except Exception:
+            pass
+        return False
+    except Exception as ex:
+        fail(f"test_start_broadcast failed: {ex}")
+        return False
+
 def main():
     print("Running comprehensive API tests against:", BASE)
     summary: List[Tuple[str, bool]] = []
@@ -291,6 +394,10 @@ def main():
         summary.append(("room_start_perms", test_room_start_permissions(room_id, uname, joiners[0])))
         summary.append(("results_leaderboard", test_results_and_leaderboard(room_id, uname)))
         summary.append(("parallel_joins", test_parallel_joins(room_id, "pj", 6)))
+        # five joins visibility check
+        summary.append(("five_joins_memberNames", test_five_joins_and_member_names(room_id)))
+        # start broadcast (SSE) check
+        summary.append(("start_broadcast", test_start_broadcast(room_id, uname)))
     else:
         fail("Skipping join/start/results tests because room registration or user creation failed")
         summary.extend([("room_joins", False), ("room_start_perms", False), ("results_leaderboard", False), ("parallel_joins", False)])

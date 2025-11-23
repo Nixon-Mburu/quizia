@@ -7,6 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping("/api/rooms")
@@ -15,6 +19,8 @@ public class RoomController {
 
     private final RoomRepository roomRepository;
     private final RoomMemberRepository memberRepository;
+    // SSE emitters per roomId
+    private final Map<String, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
 
     public RoomController(RoomRepository roomRepository, RoomMemberRepository memberRepository) {
         this.roomRepository = roomRepository;
@@ -64,7 +70,39 @@ public class RoomController {
     public ResponseEntity<?> startRoom(@RequestBody java.util.Map<String,String> body) {
         String roomId = body.getOrDefault("roomId", "");
         if (roomId.isEmpty()) return ResponseEntity.badRequest().body("roomId required");
-        // for now, no persistent state is changed; this endpoint notifies that room should start
+        // notify subscribers (SSE) that the room should start
+        List<SseEmitter> list = emitters.get(roomId);
+        if (list != null) {
+            for (SseEmitter e : list) {
+                try {
+                    SseEmitter.SseEventBuilder ev = SseEmitter.event().name("start").data("started");
+                    e.send(ev);
+                } catch (Exception ex) {
+                    // ignore; emitter may be completed
+                }
+            }
+        }
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{roomId}/events")
+    public SseEmitter subscribe(@PathVariable String roomId) {
+        SseEmitter emitter = new SseEmitter(30 * 60 * 1000L); // 30 minutes
+        emitters.computeIfAbsent(roomId, k -> new CopyOnWriteArrayList<>()).add(emitter);
+        emitter.onCompletion(() -> emitters.getOrDefault(roomId, List.of()).remove(emitter));
+        emitter.onTimeout(() -> emitters.getOrDefault(roomId, List.of()).remove(emitter));
+        try {
+            // send a comment or ping
+            emitter.send(SseEmitter.event().name("ping").data("connected"));
+        } catch (Exception ex) {
+            // ignore
+        }
+        return emitter;
+    }
+
+    // Alternative subscribe endpoint that accepts roomId as query parameter.
+    @GetMapping("/events")
+    public SseEmitter subscribeByParam(@RequestParam("roomId") String roomId) {
+        return subscribe(roomId);
     }
 }
