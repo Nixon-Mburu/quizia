@@ -7,6 +7,7 @@ public class Room {
     private String memberNames;
     private String topics;
     private String createdAt;
+    private String createdByUsername;
 
     public Room() {}
 
@@ -22,4 +23,6 @@ public class Room {
     public void setTopics(String topics) { this.topics = topics; }
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+    public String getCreatedByUsername() { return createdByUsername; }
+    public void setCreatedByUsername(String createdByUsername) { this.createdByUsername = createdByUsername; }
 }

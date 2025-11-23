@@ -95,8 +95,4 @@ public class LeaderboardController {
         public long getTotalTimeMs() { return totalTimeMs; }
     }
 }
-package com.example.quizia.frontend.controller;
 
-public class LeaderboardController {
-    // TODO: Implement leaderboard logic
-}

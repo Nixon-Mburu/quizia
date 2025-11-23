@@ -28,16 +28,29 @@ public class RoomRepository {
             r.setTopics(null);
         }
         r.setCreatedAt(rs.getString("created_at"));
+        try {
+            r.setCreatedByUsername(rs.getString("created_by_username"));
+        } catch (Exception ex) {
+            r.setCreatedByUsername(null);
+        }
         return r;
     };
 
     public List<Room> findAll() {
-        String sql = "SELECT * FROM registered_rooms ORDER BY created_at DESC";
+        String sql = "SELECT rr.*, u.username AS created_by_username FROM registered_rooms rr " +
+                "LEFT JOIN rooms r ON rr.room_id = r.room_id " +
+                "LEFT JOIN users u ON r.created_by = u.user_id " +
+                "ORDER BY rr.created_at DESC";
         return jdbc.query(sql, mapper);
     }
 
     public int addRoom(Room room) {
         String sql = "INSERT OR REPLACE INTO registered_rooms (room_id, room_name, member_count, member_names, topics, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))";
-        return jdbc.update(sql, room.getRoomId(), room.getRoomName(), room.getMemberCount(), room.getMemberNames(), room.getTopics());
+        // guard nulls
+        String mids = room.getMemberNames();
+        if (mids == null) mids = "";
+        String topics = room.getTopics();
+        if (topics == null) topics = "";
+        return jdbc.update(sql, room.getRoomId(), room.getRoomName(), room.getMemberCount(), mids, topics);
     }
 }

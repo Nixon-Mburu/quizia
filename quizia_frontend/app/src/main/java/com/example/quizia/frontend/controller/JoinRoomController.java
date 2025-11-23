@@ -80,6 +80,43 @@ public class JoinRoomController {
         });
 
         roomTable.getColumns().setAll(idCol, nameCol, memberNumCol, memberNamesCol, joinCol);
+        // Start column - only enabled for room registrar
+        TableColumn<Room, Void> startCol = new TableColumn<>("Start");
+        startCol.setCellFactory(new Callback<TableColumn<Room, Void>, TableCell<Room, Void>>() {
+            @Override
+            public TableCell<Room, Void> call(final TableColumn<Room, Void> param) {
+                return new TableCell<Room, Void>() {
+                    private final Button btn = new Button("Start Quiz");
+                    {
+                        btn.setOnAction(event -> {
+                            Room room = getTableView().getItems().get(getIndex());
+                            handleStartRoom(room);
+                        });
+                    }
+                    @Override
+                    public void updateItem(Void item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty) {
+                            setGraphic(null);
+                        } else {
+                            // show button only if current user is registrar
+                            String currentUser = "";
+                            try {
+                                java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(getClass());
+                                currentUser = prefs.get("quizia.username", "");
+                            } catch (Exception ex) { }
+                            Room r = getTableView().getItems().get(getIndex());
+                            boolean isRegistrar = r.getCreatedByUsername() != null && !r.getCreatedByUsername().isEmpty() && r.getCreatedByUsername().equals(currentUser);
+                            btn.setVisible(isRegistrar);
+                            btn.setManaged(isRegistrar);
+                            setGraphic(btn);
+                        }
+                    }
+                };
+            }
+        });
+        // append start column at end
+        roomTable.getColumns().add(startCol);
         // load rooms from backend
         fetchRoomsFromBackend();
         if (backButton != null) {
@@ -141,7 +178,8 @@ public class JoinRoomController {
                         }
                         String mn = java.util.Objects.toString(m.getOrDefault("memberNames", m.getOrDefault("member_names", "")), "");
                         String topics = java.util.Objects.toString(m.getOrDefault("topics", ""), "");
-                        items.add(new Room(rid, rname, mc, mn, topics));
+                        String createdBy = java.util.Objects.toString(m.getOrDefault("createdByUsername", m.getOrDefault("created_by_username", "")), "");
+                        items.add(new Room(rid, rname, mc, mn, topics, createdBy));
                     }
                     Platform.runLater(() -> roomTable.setItems(items));
                 } else {
@@ -154,41 +192,127 @@ public class JoinRoomController {
     }
 
     private void handleJoinRoom(Room room) {
-        // Directly open Questions page and select first available topic for the room
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/questions.fxml"));
-            Parent page = loader.load();
-            com.example.quizia.frontend.controller.QuestionsController qc = loader.getController();
-            qc.setRoomInfo(room.getRoomId(), room.getRoomName());
-            // pass saved username from preferences if available
+        // Call backend to record that this user joined the room, then open Questions page
+        new Thread(() -> {
             try {
                 java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(getClass());
-                String uname = prefs.get("quizia.username", "");
-                qc.setUsername(uname);
+                String uname = prefs.get("quizia.username", "anonymous");
+
+                // POST /api/rooms/join { roomId, username }
+                ObjectMapper mapper = new ObjectMapper();
+                java.util.Map<String,String> payload = new java.util.HashMap<>();
+                payload.put("roomId", room.getRoomId());
+                payload.put("username", uname == null || uname.isEmpty() ? "anonymous" : uname);
+                String body = mapper.writeValueAsString(payload);
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest req = HttpRequest.newBuilder()
+                        .uri(URI.create("http://localhost:8081/api/rooms/join"))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(body))
+                        .build();
+                HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
+                if (resp.statusCode() >= 200 && resp.statusCode() < 300) {
+                    // navigate to questions on FX thread
+                    Platform.runLater(() -> {
+                        try {
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/questions.fxml"));
+                            Parent page = loader.load();
+                            com.example.quizia.frontend.controller.QuestionsController qc = loader.getController();
+                            qc.setRoomInfo(room.getRoomId(), room.getRoomName());
+                            qc.setUsername(payload.get("username"));
+                            // choose first topic if available
+                            String topic = null;
+                            if (room.getTopics() != null && !room.getTopics().isEmpty()) {
+                                String[] parts = room.getTopics().split(",");
+                                if (parts.length > 0) topic = parts[0].trim();
+                            }
+                            if (topic == null || topic.isEmpty()) topic = "General Knowledge";
+                            qc.setTopic(topic);
+                            Stage stage = (Stage) root.getScene().getWindow();
+                            stage.setScene(new Scene(page));
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                            Alert alert = new Alert(AlertType.ERROR);
+                            alert.setTitle("Navigation Error");
+                            alert.setHeaderText(null);
+                            alert.setContentText("Could not open questions page: " + ex.getMessage());
+                            alert.showAndWait();
+                        }
+                    });
+                } else {
+                    Platform.runLater(() -> {
+                        Alert alert = new Alert(AlertType.ERROR);
+                        alert.setTitle("Join Failed");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Could not join room: " + resp.statusCode() + " " + resp.body());
+                        alert.showAndWait();
+                    });
+                }
             } catch (Exception ex) {
-                // ignore
+                ex.printStackTrace();
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Join Error");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Error joining room: " + ex.getMessage());
+                    alert.showAndWait();
+                });
             }
-            // choose first topic if available
-            String topic = null;
-            if (room.getTopics() != null && !room.getTopics().isEmpty()) {
-                String[] parts = room.getTopics().split(",");
-                if (parts.length > 0) topic = parts[0].trim();
+        }).start();
+    }
+
+    private void handleStartRoom(Room room) {
+        // only registrar should click this; call backend and navigate to questions
+        new Thread(() -> {
+            try {
+                java.util.Map<String,String> payload = new java.util.HashMap<>();
+                payload.put("roomId", room.getRoomId());
+                ObjectMapper mapper = new ObjectMapper();
+                String body = mapper.writeValueAsString(payload);
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest req = HttpRequest.newBuilder()
+                        .uri(URI.create("http://localhost:8081/api/rooms/start"))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(body))
+                        .build();
+                HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
+                if (resp.statusCode() >= 200 && resp.statusCode() < 300) {
+                    Platform.runLater(() -> {
+                        try {
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/questions.fxml"));
+                            Parent page = loader.load();
+                            com.example.quizia.frontend.controller.QuestionsController qc = loader.getController();
+                            qc.setRoomInfo(room.getRoomId(), room.getRoomName());
+                            try {
+                                java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(getClass());
+                                qc.setUsername(prefs.get("quizia.username", ""));
+                            } catch (Exception ex) {}
+                            String topic = null;
+                            if (room.getTopics() != null && !room.getTopics().isEmpty()) {
+                                String[] parts = room.getTopics().split(",");
+                                if (parts.length > 0) topic = parts[0].trim();
+                            }
+                            if (topic == null || topic.isEmpty()) topic = "General Knowledge";
+                            qc.setTopic(topic);
+                            Stage stage = (Stage) root.getScene().getWindow();
+                            stage.setScene(new Scene(page));
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    });
+                } else {
+                    Platform.runLater(() -> {
+                        Alert alert = new Alert(AlertType.ERROR);
+                        alert.setTitle("Start Failed");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Could not start room: " + resp.statusCode());
+                        alert.showAndWait();
+                    });
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-            if (topic == null || topic.isEmpty()) {
-                // fallback to General Knowledge
-                topic = "General Knowledge";
-            }
-            qc.setTopic(topic);
-            Stage stage = (Stage) root.getScene().getWindow();
-            stage.setScene(new Scene(page));
-        } catch (IOException e) {
-            e.printStackTrace();
-            Alert alert = new Alert(AlertType.ERROR);
-            alert.setTitle("Navigation Error");
-            alert.setHeaderText(null);
-            alert.setContentText("Could not open questions page: " + e.getMessage());
-            alert.showAndWait();
-        }
+        }).start();
     }
 
     // Room class for table data
@@ -198,22 +322,29 @@ public class JoinRoomController {
         private int memberNumber;
         private String memberNames;
         private String topics;
+        private String createdByUsername;
 
-        public Room(String roomId, String roomName, int memberNumber, String memberNames) {
-            this(roomId, roomName, memberNumber, memberNames, "");
-        }
+            public Room(String roomId, String roomName, int memberNumber, String memberNames) {
+                this(roomId, roomName, memberNumber, memberNames, "", "");
+            }
 
-        public Room(String roomId, String roomName, int memberNumber, String memberNames, String topics) {
-            this.roomId = roomId;
-            this.roomName = roomName;
-            this.memberNumber = memberNumber;
-            this.memberNames = memberNames;
-            this.topics = topics == null ? "" : topics;
-        }
+            public Room(String roomId, String roomName, int memberNumber, String memberNames, String topics) {
+                this(roomId, roomName, memberNumber, memberNames, topics, "");
+            }
+
+            public Room(String roomId, String roomName, int memberNumber, String memberNames, String topics, String createdByUsername) {
+                this.roomId = roomId;
+                this.roomName = roomName;
+                this.memberNumber = memberNumber;
+                this.memberNames = memberNames;
+                this.topics = topics == null ? "" : topics;
+                this.createdByUsername = createdByUsername == null ? "" : createdByUsername;
+            }
         public String getRoomId() { return roomId; }
         public String getRoomName() { return roomName; }
         public int getMemberNumber() { return memberNumber; }
         public String getMemberNames() { return memberNames; }
         public String getTopics() { return topics; }
+        public String getCreatedByUsername() { return createdByUsername; }
     }
 }
