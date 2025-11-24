@@ -3,10 +3,12 @@ services:
     name: quizia-backend
     env: java
     plan: free
-    buildCommand: chmod +x gradlew && ./gradlew clean build -x test
-    startCommand: java -jar build/libs/quizia_backend-0.0.1-SNAPSHOT.jar
+    buildCommand: ./gradlew clean build -x test
+    startCommand: java -jar build/libs/quizia-0.0.1-SNAPSHOT.jar
     envVars:
       - key: PORT
         value: 8080
       - key: SPRING_PROFILES_ACTIVE
         value: prod
+      - key: SERVER_PORT
+        value: 8080
