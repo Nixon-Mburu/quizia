@@ -5,8 +5,8 @@ services:
     plan: free
     rootDir: quizia_backend
     runtime: java-21
-    buildCommand: ./gradlew clean build -x test
-    startCommand: java -jar build/libs/quizia_backend-0.0.1-SNAPSHOT.jar
+    buildCommand: cd quizia_backend && ./gradlew clean build -x test
+    startCommand: java -jar quizia_backend/build/libs/quizia_backend-0.0.1-SNAPSHOT.jar
     envVars:
       - key: PORT
         value: 8080
