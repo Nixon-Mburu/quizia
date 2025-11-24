@@ -62,3 +62,20 @@ tasks.named('run') {
         ]
     }
 }
+
+tasks.register('fatJar', Jar) {
+    archiveFileName = 'quizia-frontend-all.jar'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes 'Main-Class': 'com.example.quizia.frontend.App',
+                   'Class-Path': configurations.runtimeClasspath.files.collect { it.name }.join(' ')
+    }
+    from sourceSets.main.output
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+}
+
+tasks.named('build') {
+    dependsOn fatJar
+}
