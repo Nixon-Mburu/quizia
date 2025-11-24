@@ -58,7 +58,7 @@ public class LeaderboardController {
     private void fetchLeaderboard() {
         new Thread(() -> {
             try {
-                String url = "http://localhost:8081/api/leaderboard?roomId=" + java.net.URLEncoder.encode(roomId, java.nio.charset.StandardCharsets.UTF_8);
+                String url = "http://localhost:8081/api/results";
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
                 HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
@@ -95,4 +95,3 @@ public class LeaderboardController {
         public long getTotalTimeMs() { return totalTimeMs; }
     }
 }
-

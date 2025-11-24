@@ -80,15 +80,33 @@ public class RegisterRoomController {
     private void handleRegisterRoom() {
         String roomName = roomNameField.getText();
         String roomId = roomIdField.getText();
-        // send to backend
+
+
+        if (roomName == null || roomName.trim().isEmpty()) {
+            showError("Room Name Required", "Please enter a room name.");
+            return;
+        }
+
+
+        java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(getClass());
+        String username = prefs.get("quizia.username", "");
+        if (username.isEmpty()) {
+            showError("Username Required", "Please set your username first on the auth page.");
+            return;
+        }
+
+
+        final String finalRoomId = (roomId == null || roomId.trim().isEmpty()) ? ("room_" + System.currentTimeMillis()) : roomId;
+
+
         new Thread(() -> {
             try {
                 Map<String,Object> payload = new HashMap<>();
-                payload.put("roomId", roomId);
+                payload.put("roomId", finalRoomId);
                 payload.put("roomName", roomName);
-                payload.put("memberCount", 0);
-                payload.put("memberNames", "");
-                // collect selected topics
+                payload.put("createdByUsername", username);
+
+
                 java.util.List<String> topics = new java.util.ArrayList<>();
                 if (topicGeneral != null && topicGeneral.isSelected()) topics.add("General Knowledge");
                 if (topicScience != null && topicScience.isSelected()) topics.add("Science & Technology");
@@ -96,6 +114,12 @@ public class RegisterRoomController {
                 if (topicGeo != null && topicGeo.isSelected()) topics.add("Geography");
                 if (topicSports != null && topicSports.isSelected()) topics.add("Sports");
                 if (topicHistory != null && topicHistory.isSelected()) topics.add("History & Politics");
+
+                if (topics.isEmpty()) {
+                    Platform.runLater(() -> showError("Topic Required", "Please select at least one topic."));
+                    return;
+                }
+
                 payload.put("topics", String.join(",", topics));
                 ObjectMapper mapper = new ObjectMapper();
                 String body = mapper.writeValueAsString(payload);
@@ -107,12 +131,13 @@ public class RegisterRoomController {
                         .build();
                 HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
                 Platform.runLater(() -> {
-                    Alert alert = new Alert(AlertType.INFORMATION);
-                    alert.setTitle("Room Registered");
-                    alert.setHeaderText(null);
                     if (resp.statusCode() >= 200 && resp.statusCode() < 300) {
-                        alert.setContentText("Room registered successfully");
-                        // after successful registration, navigate to join room list so it refreshes from server
+                        Alert alert = new Alert(AlertType.INFORMATION);
+                        alert.setTitle("Room Registered");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Room '" + roomName + "' registered successfully!\nRoom ID: " + finalRoomId);
+                        alert.showAndWait();
+
                         try {
                             Parent page = FXMLLoader.load(getClass().getResource("/fxml/join_room.fxml"));
                             Stage stage = (Stage) root.getScene().getWindow();
@@ -121,20 +146,23 @@ public class RegisterRoomController {
                             ex.printStackTrace();
                         }
                     } else {
-                        alert.setContentText("Failed to register room: " + resp.statusCode());
+                        showError("Registration Failed", "Failed to register room (status " + resp.statusCode() + "): " + resp.body());
                     }
-                    alert.showAndWait();
                 });
             } catch (Exception e) {
                 e.printStackTrace();
                 Platform.runLater(() -> {
-                    Alert alert = new Alert(AlertType.ERROR);
-                    alert.setTitle("Error");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Failed to register room: " + e.getMessage());
-                    alert.showAndWait();
+                    showError("Error", "Failed to register room: " + e.getMessage());
                 });
             }
         }).start();
+    }
+
+    private void showError(String title, String message) {
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

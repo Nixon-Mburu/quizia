@@ -3,11 +3,12 @@ package com.example.quizia.frontend.controller;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -18,19 +19,19 @@ public class AuthController {
     @FXML private Label logoLabel;
     @FXML private TextField usernameField;
     @FXML private Button createRoomBtn;
-    @FXML private Hyperlink joinRoomBtn;
+    @FXML private Button joinRoomBtn;
     @FXML private AnchorPane root;
 
     @FXML
     public void initialize() {
-        // load stored username so user doesn't have to re-enter
+
         Preferences prefs = Preferences.userNodeForPackage(getClass());
         String saved = prefs.get("quizia.username", "");
         if (saved != null && !saved.isEmpty()) {
             usernameField.setText(saved);
         }
 
-        // when username changes, save it
+
         usernameField.focusedProperty().addListener((obs, wasFocused, isNow) -> {
             if (!isNow) {
                 String val = usernameField.getText();
@@ -54,11 +55,30 @@ public class AuthController {
 
     private void switchScene(String fxmlPath) {
         try {
-            Parent page = FXMLLoader.load(getClass().getResource(fxmlPath));
+            java.net.URL resource = getClass().getResource(fxmlPath);
+            if (resource == null) {
+                String msg = "FXML resource not found: " + fxmlPath;
+                System.err.println(msg);
+                Alert a = new Alert(AlertType.ERROR, msg);
+                a.showAndWait();
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(resource);
+            Parent page = loader.load();
             Stage stage = (Stage) root.getScene().getWindow();
+            if (stage == null) {
+                String msg = "Unable to determine current Stage (root.getScene() returned null)";
+                System.err.println(msg);
+                Alert a = new Alert(AlertType.ERROR, msg);
+                a.showAndWait();
+                return;
+            }
             stage.setScene(new Scene(page));
         } catch (IOException e) {
             e.printStackTrace();
+            Alert a = new Alert(AlertType.ERROR, "Failed to load view: " + fxmlPath + "\n" + e.getMessage());
+            a.showAndWait();
         }
     }
 }

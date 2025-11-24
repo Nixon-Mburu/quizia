@@ -6,24 +6,46 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.CheckBox?>
-<AnchorPane fx:id="root" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.quizia.frontend.controller.RegisterRoomController" stylesheets="@../styles/app.css,@../styles/register_room.css" styleClass="root" style="-fx-background-color: white;">
+<AnchorPane fx:id="root" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.quizia.frontend.controller.RegisterRoomController" stylesheets="@../styles/register_room.css" styleClass="root">
     <children>
-        <Label layoutX="40" layoutY="40" text="Enter Room Name:" />
-        <TextField fx:id="roomNameField" layoutX="180" layoutY="35" prefWidth="200" />
-        <Label layoutX="40" layoutY="90" text="Enter Room ID:" />
-        <TextField fx:id="roomIdField" layoutX="180" layoutY="85" prefWidth="200" />
+        <VBox spacing="20.0" AnchorPane.leftAnchor="40" AnchorPane.topAnchor="40" AnchorPane.rightAnchor="40" AnchorPane.bottomAnchor="40" style="-fx-padding: 0;">
+            <!-- Header -->
+            <Label text="Create Your Quiz Room" styleClass="page-title" />
+            <Label text="Set up a new room and invite friends to play" styleClass="page-subtitle" />
+            
+            <!-- Form Card -->
+            <VBox spacing="16" styleClass="form-card" style="-fx-padding: 30;">
+                <!-- Room Name Field -->
+                <VBox spacing="8">
+                    <Label text="Room Name" styleClass="form-label" />
+                    <TextField fx:id="roomNameField" promptText="Enter a catchy room name" styleClass="form-input" />
+                </VBox>
+                
+                <!-- Room ID Field -->
+                <VBox spacing="8">
+                    <Label text="Room ID (optional)" styleClass="form-label" />
+                    <TextField fx:id="roomIdField" promptText="Auto-generated if left empty" styleClass="form-input" />
+                </VBox>
 
-        <Label layoutX="40" layoutY="130" text="Select Topics for this Room:" />
-        <VBox layoutX="180" layoutY="120" spacing="6.0">
-            <CheckBox fx:id="topicGeneral" text="General Knowledge" />
-            <CheckBox fx:id="topicScience" text="Science &amp; Technology" />
-            <CheckBox fx:id="topicPop" text="Pop Culture &amp; Entertainment" />
-            <CheckBox fx:id="topicGeo" text="Geography" />
-            <CheckBox fx:id="topicSports" text="Sports" />
-            <CheckBox fx:id="topicHistory" text="History &amp; Politics" />
+                <!-- Topics Section -->
+                <VBox spacing="12">
+                    <Label text="Select Topics (at least one)" styleClass="form-label" />
+                    <VBox spacing="10" styleClass="checkbox-group">
+                        <CheckBox fx:id="topicGeneral" text="✓ General Knowledge" styleClass="form-checkbox" />
+                        <CheckBox fx:id="topicScience" text="✓ Science &amp; Technology" styleClass="form-checkbox" />
+                        <CheckBox fx:id="topicPop" text="✓ Pop Culture &amp; Entertainment" styleClass="form-checkbox" />
+                        <CheckBox fx:id="topicGeo" text="✓ Geography" styleClass="form-checkbox" />
+                        <CheckBox fx:id="topicSports" text="✓ Sports" styleClass="form-checkbox" />
+                        <CheckBox fx:id="topicHistory" text="✓ History &amp; Politics" styleClass="form-checkbox" />
+                    </VBox>
+                </VBox>
+            </VBox>
+            
+            <!-- Action Buttons -->
+            <HBox spacing="16" style="-fx-padding: 20 0 0 0;">
+                <Button fx:id="backButton" text="← Cancel" styleClass="btn-secondary" />
+                <Button fx:id="registerButton" text="Create Room" styleClass="btn-success" />
+            </HBox>
         </VBox>
-
-        <Button fx:id="registerButton" layoutX="180" layoutY="320" text="Register Room" styleClass="primary" />
-        <Button fx:id="backButton" layoutX="40" layoutY="380" text="Back" styleClass="ghost compact" />
     </children>
 </AnchorPane>

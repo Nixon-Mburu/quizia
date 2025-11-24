@@ -30,7 +30,7 @@ public class QuestionRepository {
     };
 
     public List<Question> findByTopic(String topic, int limit) {
-        // Randomize returned questions so each quiz is different per request
+
         String sql = "SELECT * FROM questions WHERE topic = ? ORDER BY RANDOM() LIMIT ?";
         return jdbc.query(sql, mapper, topic, limit);
     }

@@ -16,17 +16,17 @@ public class QuestionsApiDebugFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
         if (req.getRequestURI().startsWith("/api/questions")) {
-            // Use a wrapper to capture the response body (handles both writer and output stream)
+
             BufferedResponseWrapper wrapper = new BufferedResponseWrapper(res);
             chain.doFilter(request, wrapper);
             byte[] bodyBytes = wrapper.getBody();
-            // Write to /tmp/quizia_backend_questions.json
+
             try (FileOutputStream fos = new FileOutputStream("/tmp/quizia_backend_questions.json", false)) {
                 fos.write(bodyBytes);
             } catch (Exception ex) {
-                // ignore
+
             }
-            // Write the captured body to the real response
+
             res.setContentType(wrapper.getContentType());
             res.setCharacterEncoding(wrapper.getCharacterEncoding());
             res.getOutputStream().write(bodyBytes);
@@ -36,7 +36,7 @@ public class QuestionsApiDebugFilter implements Filter {
         }
     }
 
-    // Wrapper to capture response body
+
     private static class BufferedResponseWrapper extends HttpServletResponseWrapper {
         private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         private final ServletOutputStream outStream = new ServletOutputStream() {
@@ -50,7 +50,7 @@ public class QuestionsApiDebugFilter implements Filter {
             }
             @Override
             public void setWriteListener(WriteListener writeListener) {
-                // No-op for this simple wrapper
+
             }
         };
         private PrintWriter writer;

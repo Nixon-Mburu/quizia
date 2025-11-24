@@ -19,13 +19,13 @@ public class PickTopicController {
 
     @FXML
     private void onPickTopic(ActionEvent event) {
-        // Determine which hyperlink was clicked and get its text as topic
+
         String topic = "";
         if (event.getSource() instanceof javafx.scene.control.Hyperlink) {
             javafx.scene.control.Hyperlink link = (javafx.scene.control.Hyperlink) event.getSource();
             topic = link.getText();
         }
-        // Load questions.fxml and pass room/topic to its controller
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/questions.fxml"));
             Parent page = loader.load();
@@ -44,7 +44,7 @@ public class PickTopicController {
 
     @FXML
     private void onBack(ActionEvent event) {
-        // go back to join_room.fxml
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/join_room.fxml"));
             Parent page = loader.load();

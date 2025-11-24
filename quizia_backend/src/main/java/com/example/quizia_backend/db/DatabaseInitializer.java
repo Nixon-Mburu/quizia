@@ -27,9 +27,9 @@ public class DatabaseInitializer {
     @PostConstruct
     public void init() throws SQLException, IOException {
         try (Connection conn = dataSource.getConnection()) {
-            // Run the SQL script to create tables and seed data if not present
+
             ScriptUtils.executeSqlScript(conn, schemaSql);
-            // Ensure `topics` column exists on registered_rooms for backward compatibility
+
             boolean hasTopics = false;
             try (var stmt = conn.createStatement();
                  var rs = stmt.executeQuery("PRAGMA table_info(registered_rooms);")) {

@@ -46,7 +46,7 @@ public class RoomRepository {
 
     public int addRoom(Room room) {
         String sql = "INSERT OR REPLACE INTO registered_rooms (room_id, room_name, member_count, member_names, topics, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))";
-        // guard nulls
+
         String mids = room.getMemberNames();
         if (mids == null) mids = "";
         String topics = room.getTopics();

@@ -1,19 +1,14 @@
 package com.example.quizia.frontend.controller;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.util.Callback;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.AnchorPane;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -28,158 +23,49 @@ import java.net.http.HttpResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.List;
+import javafx.animation.FadeTransition;
+import javafx.animation.TranslateTransition;
+import javafx.animation.ParallelTransition;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 
 public class JoinRoomController {
 
-
     @FXML
-    private TableView<Room> roomTable;
+    private VBox roomCardsContainer;
 
     @FXML
     private Button backButton;
 
     @FXML
-    private Button startButton;
+    private Label roomCountLabel;
 
     @FXML
     private AnchorPane root;
 
+    private List<Room> rooms = new java.util.ArrayList<>();
+    private String currentRoomId = null;
+    private boolean isWaitingInRoom = false;
+    private Thread sseThread = null;
+
     @FXML
     private void initialize() {
-        // Set up columns
-        TableColumn<Room, String> idCol = new TableColumn<>("Room ID");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("roomId"));
 
-        TableColumn<Room, String> nameCol = new TableColumn<>("Room Name");
-        nameCol.setCellValueFactory(new PropertyValueFactory<>("roomName"));
-
-        TableColumn<Room, Integer> memberNumCol = new TableColumn<>("Member Number");
-        memberNumCol.setCellValueFactory(new PropertyValueFactory<>("memberNumber"));
-
-        TableColumn<Room, String> memberNamesCol = new TableColumn<>("Member Names");
-        memberNamesCol.setCellValueFactory(new PropertyValueFactory<>("memberNames"));
-        // render member names as chips
-        memberNamesCol.setCellFactory(col -> new TableCell<Room, String>() {
-            private final FlowPane pane = new FlowPane();
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                pane.getChildren().clear();
-                if (empty || item == null || item.trim().isEmpty()) {
-                    setGraphic(null);
-                } else {
-                    String[] parts = item.split(",");
-                    for (String p : parts) {
-                        Label lbl = new Label(p.trim());
-                        lbl.getStyleClass().addAll("member-chip");
-                        pane.getChildren().add(lbl);
-                    }
-                    setGraphic(pane);
-                }
-            }
-        });
-
-        TableColumn<Room, Void> joinCol = new TableColumn<>("Join");
-        joinCol.setCellFactory(new Callback<TableColumn<Room, Void>, TableCell<Room, Void>>() {
-            @Override
-            public TableCell<Room, Void> call(final TableColumn<Room, Void> param) {
-                return new TableCell<Room, Void>() {
-                    private final Button btn = new Button("Join");
-                    {
-                        btn.getStyleClass().addAll("table-action");
-                        btn.setOnAction(event -> {
-                            Room room = getTableView().getItems().get(getIndex());
-                                    handleJoinRoom(room);
-                        });
-                    }
-                    @Override
-                    public void updateItem(Void item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty) {
-                            setGraphic(null);
-                        } else {
-                            setGraphic(btn);
-                        }
-                    }
-                };
-            }
-        });
-
-        roomTable.getColumns().setAll(idCol, nameCol, memberNumCol, memberNamesCol, joinCol);
-        // Start column - only enabled for room registrar
-        TableColumn<Room, Void> startCol = new TableColumn<>("Start");
-        startCol.setCellFactory(new Callback<TableColumn<Room, Void>, TableCell<Room, Void>>() {
-            @Override
-            public TableCell<Room, Void> call(final TableColumn<Room, Void> param) {
-                return new TableCell<Room, Void>() {
-                    private final Button btn = new Button("Start Quiz");
-                    {
-                        btn.getStyleClass().addAll("start-button");
-                        btn.setOnAction(event -> {
-                            Room room = getTableView().getItems().get(getIndex());
-                            handleStartRoom(room);
-                        });
-                    }
-                    @Override
-                    public void updateItem(Void item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty) {
-                            setGraphic(null);
-                        } else {
-                            // show button only if current user is registrar
-                            String currentUser = "";
-                            try {
-                                java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(getClass());
-                                currentUser = prefs.get("quizia.username", "");
-                            } catch (Exception ex) { }
-                            Room r = getTableView().getItems().get(getIndex());
-                            boolean isRegistrar = r.getCreatedByUsername() != null && !r.getCreatedByUsername().isEmpty() && r.getCreatedByUsername().equals(currentUser);
-                            btn.setVisible(isRegistrar);
-                            btn.setManaged(isRegistrar);
-                            setGraphic(btn);
-                        }
-                    }
-                };
-            }
-        });
-        // append start column at end
-        roomTable.getColumns().add(startCol);
-        // load rooms from backend
         fetchRoomsFromBackend();
-        // start button action - act on selected row
-        if (startButton != null) {
-            startButton.setOnAction(ev -> {
-                Room sel = roomTable.getSelectionModel().getSelectedItem();
-                if (sel != null) handleStartRoom(sel);
-            });
-            startButton.setVisible(false);
-            startButton.setManaged(false);
-        }
-        // show/hide start button depending on selection and registrar
-        roomTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
-            try {
-                java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(getClass());
-                String currentUser = prefs.get("quizia.username", "");
-                boolean show = false;
-                if (newSel != null) {
-                    show = newSel.getCreatedByUsername() != null && !newSel.getCreatedByUsername().isEmpty() && newSel.getCreatedByUsername().equals(currentUser);
-                }
-                if (startButton != null) {
-                    startButton.setVisible(show);
-                    startButton.setManaged(show);
-                }
-            } catch (Exception ex) {}
-        });
+
+
         if (backButton != null) {
-            backButton.setOnAction(event -> goToAuthPage());
+            backButton.setOnAction(e -> {
+                cleanup();
+                goBackToAuth();
+            });
         }
 
-        // Refresh room list when the scene becomes visible (e.g., after registering a room)
+
         root.sceneProperty().addListener((obsScene, oldScene, newScene) -> {
             if (newScene != null) {
                 newScene.windowProperty().addListener((obsWin, oldWin, newWin) -> {
                     if (newWin != null) {
-                        // when window is shown, refresh rooms
                         fetchRoomsFromBackend();
                     }
                 });
@@ -187,7 +73,14 @@ public class JoinRoomController {
         });
     }
 
-    private void goToAuthPage() {
+    private void cleanup() {
+        isWaitingInRoom = false;
+        if (sseThread != null && sseThread.isAlive()) {
+            sseThread.interrupt();
+        }
+    }
+
+    private void goBackToAuth() {
         try {
             Parent page = FXMLLoader.load(getClass().getResource("/fxml/auth.fxml"));
             Stage stage = (Stage) root.getScene().getWindow();
@@ -197,16 +90,127 @@ public class JoinRoomController {
         }
     }
 
-    private ObservableList<Room> getMockRooms() {
-        return FXCollections.observableArrayList(
-            new Room("101", "Alpha", 3, "Alice, Bob, Carol"),
-            new Room("102", "Beta", 2, "Dave, Eve"),
-            new Room("103", "Gamma", 4, "Frank, Grace, Heidi, Ivan"),
-            new Room("104", "Delta", 1, "Judy")
-        );
+    private void renderRoomCards() {
+        roomCardsContainer.getChildren().clear();
+
+        if (rooms.isEmpty()) {
+            Label emptyLabel = new Label("No rooms available. Create one to get started!");
+                emptyLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #5C4A3A; -fx-padding: 40 0 0 0;");
+            roomCardsContainer.getChildren().add(emptyLabel);
+            if (roomCountLabel != null) {
+                roomCountLabel.setText("No rooms");
+            }
+            return;
+        }
+
+        if (roomCountLabel != null) {
+            roomCountLabel.setText(rooms.size() + " room(s) available");
+        }
+
+        String currentUser = "";
+        try {
+            java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(getClass());
+            currentUser = prefs.get("quizia.username", "");
+        } catch (Exception ex) { }
+
+        for (Room room : rooms) {
+            VBox card = createRoomCard(room, currentUser);
+            roomCardsContainer.getChildren().add(card);
+        }
+    }
+
+    private VBox createRoomCard(Room room, String currentUser) {
+        VBox card = new VBox(12);
+        card.getStyleClass().add("room-card");
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 20px; -fx-border-radius: 20px; " +
+                "-fx-border-color: #2C1810; -fx-border-width: 2px; -fx-padding: 24; " +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 4);");
+
+        HBox header = new HBox(12);
+        header.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+
+        Label nameLabel = new Label(room.getRoomName());
+        nameLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: 700; -fx-text-fill: #2C1810;");
+
+        Label idBadge = new Label("ID: " + room.getRoomId());
+        idBadge.setStyle("-fx-font-size: 12px; -fx-text-fill: #667eea; -fx-background-color: #EEF2FF; " +
+                "-fx-padding: 4 12; -fx-background-radius: 12px;");
+
+        header.getChildren().addAll(nameLabel, idBadge);
+
+        // Topics
+        HBox topicsBox = new HBox(8);
+        topicsBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        Label topicsIcon = new Label("📚");
+        topicsIcon.setStyle("-fx-font-size: 16px;");
+        Label topicsLabel = new Label("Topics: " + (room.getTopics() != null ? room.getTopics() : "N/A"));
+        topicsLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #5C4A3A;");
+        topicsBox.getChildren().addAll(topicsIcon, topicsLabel);
+
+        // Members
+        HBox membersBox = new HBox(8);
+        membersBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        Label membersIcon = new Label("👥");
+        membersIcon.setStyle("-fx-font-size: 16px;");
+        Label membersCount = new Label(room.getMemberNumber() + " player(s)");
+        membersCount.setStyle("-fx-font-size: 14px; -fx-text-fill: #5C4A3A; -fx-font-weight: 600;");
+        membersBox.getChildren().addAll(membersIcon, membersCount);
+
+        FlowPane membersChips = new FlowPane(8, 8);
+        if (room.getMemberNames() != null && !room.getMemberNames().trim().isEmpty()) {
+            String[] members = room.getMemberNames().split(",");
+            for (String member : members) {
+                Label chip = new Label(member.trim());
+                chip.setStyle("-fx-background-color: #E0E7FF; -fx-text-fill: #4F46E5; " +
+                        "-fx-padding: 6 12; -fx-background-radius: 12px; -fx-font-size: 12px; -fx-font-weight: 600;");
+                membersChips.getChildren().add(chip);
+            }
+        }
+
+        // Creator info
+        HBox creatorBox = new HBox(8);
+        creatorBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        Label creatorIcon = new Label("⭐");
+        creatorIcon.setStyle("-fx-font-size: 14px;");
+        Label creatorLabel = new Label("Created by: " + (room.getCreatedByUsername() != null ? room.getCreatedByUsername() : "Unknown"));
+        creatorLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #8B7355; -fx-font-style: italic;");
+        creatorBox.getChildren().addAll(creatorIcon, creatorLabel);
+
+        // Actions
+        HBox actionsBox = new HBox(12);
+        actionsBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        actionsBox.setStyle("-fx-padding: 12 0 0 0;");
+
+        Button joinBtn = new Button("Join Room");
+        joinBtn.getStyleClass().add("btn-primary");
+        joinBtn.setStyle("-fx-background-color: linear-gradient(#667eea, #5568d3); " +
+                "-fx-text-fill: white; -fx-font-weight: 700; -fx-font-size: 14px; " +
+                "-fx-padding: 10 24; -fx-background-radius: 10px; -fx-cursor: hand; " +
+                "-fx-effect: dropshadow(gaussian, rgba(102,126,234,0.3), 10, 0, 0, 3);");
+        joinBtn.setOnAction(e -> handleJoinRoom(room));
+        actionsBox.getChildren().add(joinBtn);
+
+        boolean isCreator = room.getCreatedByUsername() != null &&
+                !room.getCreatedByUsername().isEmpty() &&
+                room.getCreatedByUsername().equals(currentUser);
+
+        if (isCreator) {
+            Button startBtn = new Button("Start Quiz ▶");
+            startBtn.getStyleClass().add("btn-success");
+            startBtn.setStyle("-fx-background-color: linear-gradient(#10B981, #059669); " +
+                    "-fx-text-fill: white; -fx-font-weight: 700; -fx-font-size: 14px; " +
+                    "-fx-padding: 10 24; -fx-background-radius: 10px; -fx-cursor: hand; " +
+                    "-fx-effect: dropshadow(gaussian, rgba(16,185,129,0.3), 10, 0, 0, 3);");
+            startBtn.setOnAction(e -> handleStartRoom(room));
+            actionsBox.getChildren().add(startBtn);
+        }
+
+        card.getChildren().addAll(header, topicsBox, membersBox, membersChips, creatorBox, actionsBox);
+        return card;
     }
 
     private void fetchRoomsFromBackend() {
+
         new Thread(() -> {
             try {
                 String url = "http://localhost:8081/api/rooms";
@@ -216,7 +220,7 @@ public class JoinRoomController {
                 if (resp.statusCode() == 200) {
                     ObjectMapper mapper = new ObjectMapper();
                     List<java.util.Map<String,Object>> list = mapper.readValue(resp.body(), new TypeReference<List<java.util.Map<String,Object>>>(){});
-                    ObservableList<Room> items = FXCollections.observableArrayList();
+                    List<Room> fetchedRooms = new java.util.ArrayList<>();
                     for (java.util.Map<String,Object> m : list) {
                         String rid = java.util.Objects.toString(m.getOrDefault("roomId", m.getOrDefault("room_id", "")), "");
                         String rname = java.util.Objects.toString(m.getOrDefault("roomName", m.getOrDefault("room_name", "")), "");
@@ -230,9 +234,12 @@ public class JoinRoomController {
                         String mn = java.util.Objects.toString(m.getOrDefault("memberNames", m.getOrDefault("member_names", "")), "");
                         String topics = java.util.Objects.toString(m.getOrDefault("topics", ""), "");
                         String createdBy = java.util.Objects.toString(m.getOrDefault("createdByUsername", m.getOrDefault("created_by_username", "")), "");
-                        items.add(new Room(rid, rname, mc, mn, topics, createdBy));
+                        fetchedRooms.add(new Room(rid, rname, mc, mn, topics, createdBy));
                     }
-                    Platform.runLater(() -> roomTable.setItems(items));
+                    Platform.runLater(() -> {
+                        rooms = fetchedRooms;
+                        renderRoomCards();
+                    });
                 } else {
                     System.err.println("Failed to fetch rooms: " + resp.statusCode());
                 }
@@ -243,13 +250,13 @@ public class JoinRoomController {
     }
 
     private void handleJoinRoom(Room room) {
-        // Call backend to record that this user joined the room, then open Questions page
+
         new Thread(() -> {
             try {
                 java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(getClass());
                 String uname = prefs.get("quizia.username", "anonymous");
 
-                // POST /api/rooms/join { roomId, username }
+
                 ObjectMapper mapper = new ObjectMapper();
                 java.util.Map<String,String> payload = new java.util.HashMap<>();
                 payload.put("roomId", room.getRoomId());
@@ -263,34 +270,13 @@ public class JoinRoomController {
                         .build();
                 HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
                 if (resp.statusCode() >= 200 && resp.statusCode() < 300) {
-                    // navigate to questions on FX thread
-                    Platform.runLater(() -> {
-                        try {
-                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/questions.fxml"));
-                            Parent page = loader.load();
-                            com.example.quizia.frontend.controller.QuestionsController qc = loader.getController();
-                            qc.setRoomInfo(room.getRoomId(), room.getRoomName());
-                            qc.setUsername(payload.get("username"));
-                            // choose first topic if available and fetch questions immediately
-                            String topic = null;
-                            if (room.getTopics() != null && !room.getTopics().isEmpty()) {
-                                String[] parts = room.getTopics().split(",");
-                                if (parts.length > 0) topic = parts[0].trim();
-                            }
-                            if (topic == null || topic.isEmpty()) topic = "General Knowledge";
-                            // fetch questions now for participants so they can see randomized questions
-                            qc.setTopic(topic);
-                            Stage stage = (Stage) root.getScene().getWindow();
-                            stage.setScene(new Scene(page));
-                        } catch (IOException ex) {
-                            ex.printStackTrace();
-                            Alert alert = new Alert(AlertType.ERROR);
-                            alert.setTitle("Navigation Error");
-                            alert.setHeaderText(null);
-                            alert.setContentText("Could not open questions page: " + ex.getMessage());
-                            alert.showAndWait();
-                        }
-                    });
+
+                    Platform.runLater(() -> showJoinNotification(payload.get("username") + " joined"));
+
+
+                    currentRoomId = room.getRoomId();
+                    isWaitingInRoom = true;
+                    startListeningForGameStart(room, payload.get("username"));
                 } else {
                     Platform.runLater(() -> {
                         Alert alert = new Alert(AlertType.ERROR);
@@ -314,7 +300,7 @@ public class JoinRoomController {
     }
 
     private void handleStartRoom(Room room) {
-        // only registrar should click this; call backend and navigate to questions
+
         new Thread(() -> {
             try {
                 java.util.Map<String,String> payload = new java.util.HashMap<>();
@@ -335,17 +321,14 @@ public class JoinRoomController {
                             Parent page = loader.load();
                             com.example.quizia.frontend.controller.QuestionsController qc = loader.getController();
                             qc.setRoomInfo(room.getRoomId(), room.getRoomName());
-                            try {
-                                java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(getClass());
-                                qc.setUsername(prefs.get("quizia.username", ""));
-                            } catch (Exception ex) {}
+                            java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(getClass());
+                            qc.setUsername(prefs.get("quizia.username", ""));
                             String topic = null;
                             if (room.getTopics() != null && !room.getTopics().isEmpty()) {
                                 String[] parts = room.getTopics().split(",");
                                 if (parts.length > 0) topic = parts[0].trim();
                             }
                             if (topic == null || topic.isEmpty()) topic = "General Knowledge";
-                            // registrar starts immediately
                             qc.setTopic(topic);
                             Stage stage = (Stage) root.getScene().getWindow();
                             stage.setScene(new Scene(page));
@@ -368,7 +351,117 @@ public class JoinRoomController {
         }).start();
     }
 
-    // Room class for table data
+    private void startListeningForGameStart(Room room, String username) {
+
+        sseThread = new Thread(() -> {
+            try {
+                HttpClient client = HttpClient.newHttpClient();
+                HttpRequest req = HttpRequest.newBuilder()
+                        .uri(URI.create("http://localhost:8081/api/rooms/" + room.getRoomId() + "/sse"))
+                        .GET()
+                        .build();
+
+                client.sendAsync(req, HttpResponse.BodyHandlers.ofLines())
+                    .thenAccept(resp -> {
+                        resp.body().forEach(line -> {
+                            if (!isWaitingInRoom) return;
+
+                            if (line.startsWith("data:")) {
+                                String data = line.substring(5).trim();
+
+
+                                if (data.contains("USER_JOINED")) {
+
+                                    try {
+                                        String joinedUser = data.substring(data.indexOf(":") + 1).trim();
+                                        if (!joinedUser.equals(username)) {
+                                            Platform.runLater(() -> showJoinNotification(joinedUser + " joined"));
+                                        }
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                } else if (data.contains("GAME_STARTED")) {
+
+                                    isWaitingInRoom = false;
+                                    Platform.runLater(() -> {
+                                        try {
+                                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/questions.fxml"));
+                                            Parent page = loader.load();
+                                            com.example.quizia.frontend.controller.QuestionsController qc = loader.getController();
+                                            qc.setRoomInfo(room.getRoomId(), room.getRoomName());
+                                            qc.setUsername(username);
+                                            String topic = null;
+                                            if (room.getTopics() != null && !room.getTopics().isEmpty()) {
+                                                String[] parts = room.getTopics().split(",");
+                                                if (parts.length > 0) topic = parts[0].trim();
+                                            }
+                                            if (topic == null || topic.isEmpty()) topic = "General Knowledge";
+                                            qc.setTopic(topic);
+                                            Stage stage = (Stage) root.getScene().getWindow();
+                                            stage.setScene(new Scene(page));
+                                        } catch (Exception ex) {
+                                            ex.printStackTrace();
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    })
+                    .exceptionally(ex -> {
+                        ex.printStackTrace();
+                        return null;
+                    });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        sseThread.setDaemon(true);
+        sseThread.start();
+    }
+
+    private void showJoinNotification(String message) {
+
+        VBox toast = new VBox();
+        toast.setStyle("-fx-background-color: linear-gradient(to right, #10B981 0%, #059669 100%); " +
+                      "-fx-background-radius: 15px; -fx-padding: 16 24; " +
+                      "-fx-effect: dropshadow(gaussian, rgba(16,185,129,0.4), 20, 0, 0, 5);");
+
+        Label toastLabel = new Label(message);
+        toastLabel.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: 700;");
+        toast.getChildren().add(toastLabel);
+
+
+        toast.setLayoutX((root.getWidth() - 300) / 2);
+        toast.setLayoutY(20);
+        toast.setOpacity(0);
+
+        root.getChildren().add(toast);
+
+
+        javafx.animation.FadeTransition fadeIn = new javafx.animation.FadeTransition(javafx.util.Duration.millis(400), toast);
+        fadeIn.setFromValue(0);
+        fadeIn.setToValue(1);
+
+        javafx.animation.TranslateTransition slideIn = new javafx.animation.TranslateTransition(javafx.util.Duration.millis(400), toast);
+        slideIn.setFromY(-50);
+        slideIn.setToY(0);
+
+        javafx.animation.ParallelTransition showAnim = new javafx.animation.ParallelTransition(fadeIn, slideIn);
+        showAnim.play();
+
+
+        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+        pause.setOnFinished(e -> {
+            javafx.animation.FadeTransition fadeOut = new javafx.animation.FadeTransition(javafx.util.Duration.millis(400), toast);
+            fadeOut.setFromValue(1);
+            fadeOut.setToValue(0);
+            fadeOut.setOnFinished(ev -> root.getChildren().remove(toast));
+            fadeOut.play();
+        });
+        pause.play();
+    }
+
+
     public static class Room {
         private String roomId;
         private String roomName;

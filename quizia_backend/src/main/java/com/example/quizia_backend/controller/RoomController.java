@@ -1,13 +1,18 @@
 package com.example.quizia_backend.controller;
 
 import com.example.quizia_backend.model.Room;
+import com.example.quizia_backend.model.Question;
 import com.example.quizia_backend.repository.RoomRepository;
 import com.example.quizia_backend.repository.RoomMemberRepository;
+import com.example.quizia_backend.repository.QuestionRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -19,18 +24,27 @@ public class RoomController {
 
     private final RoomRepository roomRepository;
     private final RoomMemberRepository memberRepository;
-    // SSE emitters per roomId
+    private final com.example.quizia_backend.repository.QuestionRepository questionRepository;
+
+
     private final Map<String, List<SseEmitter>> emitters = new ConcurrentHashMap<>();
 
-    public RoomController(RoomRepository roomRepository, RoomMemberRepository memberRepository) {
+
+    private final Map<String, List<com.example.quizia_backend.model.Question>> roomQuestions = new ConcurrentHashMap<>();
+    private final Map<String, Map<Integer, Set<String>>> roomAnswers = new ConcurrentHashMap<>();
+    private final Map<String, List<SseEmitter>> syncEmitters = new ConcurrentHashMap<>();
+
+    public RoomController(RoomRepository roomRepository, RoomMemberRepository memberRepository,
+                         com.example.quizia_backend.repository.QuestionRepository questionRepository) {
         this.roomRepository = roomRepository;
         this.memberRepository = memberRepository;
+        this.questionRepository = questionRepository;
     }
 
     @GetMapping
     public List<Room> listRooms() {
         List<Room> rooms = roomRepository.findAll();
-        // enrich rooms with live member counts/names from room_members
+
         for (Room r : rooms) {
             try {
                 int count = memberRepository.countMembers(r.getRoomId());
@@ -43,7 +57,7 @@ public class RoomController {
                 }
                 r.setMemberNames(names.toString());
             } catch (Exception ex) {
-                // ignore and leave values previously set by repository
+
             }
         }
         return rooms;
@@ -70,7 +84,7 @@ public class RoomController {
     public ResponseEntity<?> startRoom(@RequestBody java.util.Map<String,String> body) {
         String roomId = body.getOrDefault("roomId", "");
         if (roomId.isEmpty()) return ResponseEntity.badRequest().body("roomId required");
-        // notify subscribers (SSE) that the room should start
+
         List<SseEmitter> list = emitters.get(roomId);
         if (list != null) {
             for (SseEmitter e : list) {
@@ -78,7 +92,7 @@ public class RoomController {
                     SseEmitter.SseEventBuilder ev = SseEmitter.event().name("start").data("started");
                     e.send(ev);
                 } catch (Exception ex) {
-                    // ignore; emitter may be completed
+
                 }
             }
         }
@@ -87,22 +101,136 @@ public class RoomController {
 
     @GetMapping("/{roomId}/events")
     public SseEmitter subscribe(@PathVariable String roomId) {
-        SseEmitter emitter = new SseEmitter(30 * 60 * 1000L); // 30 minutes
+        SseEmitter emitter = new SseEmitter(30 * 60 * 1000L);
         emitters.computeIfAbsent(roomId, k -> new CopyOnWriteArrayList<>()).add(emitter);
         emitter.onCompletion(() -> emitters.getOrDefault(roomId, List.of()).remove(emitter));
         emitter.onTimeout(() -> emitters.getOrDefault(roomId, List.of()).remove(emitter));
         try {
-            // send a comment or ping
+
             emitter.send(SseEmitter.event().name("ping").data("connected"));
         } catch (Exception ex) {
-            // ignore
+
         }
         return emitter;
     }
 
-    // Alternative subscribe endpoint that accepts roomId as query parameter.
+
     @GetMapping("/events")
     public SseEmitter subscribeByParam(@RequestParam("roomId") String roomId) {
         return subscribe(roomId);
+    }
+
+
+    @GetMapping("/{roomId}/questions")
+    public ResponseEntity<?> getRoomQuestions(@PathVariable String roomId) {
+        try {
+
+            if (!roomQuestions.containsKey(roomId)) {
+
+                List<Room> rooms = roomRepository.findAll();
+                Room room = rooms.stream()
+                    .filter(r -> r.getRoomId().equals(roomId))
+                    .findFirst()
+                    .orElse(null);
+
+                if (room == null) {
+                    return ResponseEntity.notFound().build();
+                }
+
+                String topic = room.getTopics();
+                if (topic == null || topic.isEmpty()) {
+                    topic = "General Knowledge";
+                }
+
+
+                if (topic.contains(",")) {
+                    topic = topic.split(",")[0].trim();
+                }
+
+                List<com.example.quizia_backend.model.Question> allQuestions = questionRepository.findByTopic(topic, 50);
+
+
+                java.util.Collections.shuffle(allQuestions);
+                List<com.example.quizia_backend.model.Question> selected = allQuestions.stream()
+                    .limit(5)
+                    .collect(java.util.stream.Collectors.toList());
+
+                roomQuestions.put(roomId, selected);
+
+
+                roomAnswers.putIfAbsent(roomId, new ConcurrentHashMap<>());
+            }
+
+            return ResponseEntity.ok(roomQuestions.get(roomId));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ResponseEntity.status(500).body("Error fetching questions: " + ex.getMessage());
+        }
+    }
+
+
+    @PostMapping("/answer")
+    public ResponseEntity<?> submitAnswer(@RequestBody Map<String, Object> payload) {
+        try {
+            String roomId = (String) payload.get("roomId");
+            String username = (String) payload.get("username");
+            Integer questionIndex = (Integer) payload.get("questionIndex");
+
+            if (roomId == null || username == null || questionIndex == null) {
+                return ResponseEntity.badRequest().body("roomId, username, and questionIndex required");
+            }
+
+
+            roomAnswers.computeIfAbsent(roomId, k -> new ConcurrentHashMap<>())
+                       .computeIfAbsent(questionIndex, k -> java.util.Collections.synchronizedSet(new java.util.HashSet<>()))
+                       .add(username);
+
+
+            int memberCount = memberRepository.countMembers(roomId);
+            int answeredCount = roomAnswers.get(roomId).get(questionIndex).size();
+
+            System.out.println("[Room " + roomId + "] Question " + questionIndex + ": " + answeredCount + "/" + memberCount + " answered");
+
+            if (answeredCount >= memberCount && memberCount > 0) {
+
+                broadcastToSync(roomId, "NEXT_QUESTION:" + questionIndex);
+            }
+
+            return ResponseEntity.ok().build();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return ResponseEntity.status(500).body("Error submitting answer: " + ex.getMessage());
+        }
+    }
+
+
+    @GetMapping("/{roomId}/sync")
+    public SseEmitter subscribeSync(@PathVariable String roomId) {
+        SseEmitter emitter = new SseEmitter(30 * 60 * 1000L);
+        syncEmitters.computeIfAbsent(roomId, k -> new CopyOnWriteArrayList<>()).add(emitter);
+
+        emitter.onCompletion(() -> syncEmitters.getOrDefault(roomId, List.of()).remove(emitter));
+        emitter.onTimeout(() -> syncEmitters.getOrDefault(roomId, List.of()).remove(emitter));
+
+        try {
+            emitter.send(SseEmitter.event().name("connected").data("sync"));
+        } catch (Exception ex) {
+
+        }
+
+        return emitter;
+    }
+
+    private void broadcastToSync(String roomId, String message) {
+        List<SseEmitter> emitterList = syncEmitters.get(roomId);
+        if (emitterList != null) {
+            for (SseEmitter emitter : emitterList) {
+                try {
+                    emitter.send(SseEmitter.event().data(message));
+                } catch (Exception ex) {
+
+                }
+            }
+        }
     }
 }
