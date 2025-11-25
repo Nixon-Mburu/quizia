@@ -1,12 +1,10 @@
 services:
   - type: web
     name: quizia-backend
-    env: java
+    env: docker
     plan: free
     rootDir: quizia_backend
-    runtime: java-21
-    buildCommand: cd quizia_backend && ./gradlew clean build -x test
-    startCommand: java -jar quizia_backend/build/libs/quizia_backend-0.0.1-SNAPSHOT.jar
+    dockerfilePath: quizia_backend/Dockerfile
     envVars:
       - key: PORT
         value: 8080
