@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import com.example.quizia.frontend.model.Question;
+import com.example.quizia.frontend.config.ServerConfig;
 
 public class QuestionsController {
 
@@ -115,7 +116,7 @@ public class QuestionsController {
         if (roomId == null || roomId.isEmpty()) return;
         new Thread(() -> {
             try {
-                String url = "http://localhost:8081/api/rooms/" + roomId + "/sse";
+                String url = ServerConfig.getBackendUrl() + "/api/rooms/" + roomId + "/sse";
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
                 HttpResponse<java.io.InputStream> resp = client.send(req, HttpResponse.BodyHandlers.ofInputStream());
@@ -185,7 +186,7 @@ public class QuestionsController {
         new Thread(() -> {
             try {
                 logDebug("fetchQuestionsForTopic() starting for room=" + roomId);
-                String url = "http://localhost:8081/api/questions?room=" + roomId + "&topic=" + topic;
+                String url = ServerConfig.getBackendUrl() + "/api/questions?room=" + roomId + "&topic=" + topic;
                 logDebug("GET " + url);
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest req = HttpRequest.newBuilder()
@@ -390,7 +391,7 @@ public class QuestionsController {
 
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest req = HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:8081/api/answers/submit"))
+                        .uri(URI.create(ServerConfig.getBackendUrl() + "/api/answers/submit"))
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(body))
                         .build();
@@ -417,7 +418,7 @@ public class QuestionsController {
     private void startSyncListener() {
         sseThread = new Thread(() -> {
             try {
-                String url = "http://localhost:8081/api/rooms/" + roomId + "/sync";
+                String url = ServerConfig.getBackendUrl() + "/api/rooms/" + roomId + "/sync";
                 logDebug("Starting SSE sync listener: " + url);
 
                 HttpClient client = HttpClient.newHttpClient();
@@ -496,7 +497,7 @@ public class QuestionsController {
 
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest req = HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:8081/api/results/submit"))
+                        .uri(URI.create(ServerConfig.getBackendUrl() + "/api/results/submit"))
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(body))
                         .build();

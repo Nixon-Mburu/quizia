@@ -28,6 +28,7 @@ import javafx.animation.TranslateTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
+import com.example.quizia.frontend.config.ServerConfig;
 
 public class JoinRoomController {
 
@@ -213,7 +214,7 @@ public class JoinRoomController {
 
         new Thread(() -> {
             try {
-                String url = "http://localhost:8081/api/rooms";
+                String url = ServerConfig.getBackendUrl() + "/api/rooms";
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
                 HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
@@ -264,7 +265,7 @@ public class JoinRoomController {
                 String body = mapper.writeValueAsString(payload);
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest req = HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:8081/api/rooms/join"))
+                        .uri(URI.create(ServerConfig.getBackendUrl() + "/api/rooms/join"))
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(body))
                         .build();
@@ -309,7 +310,7 @@ public class JoinRoomController {
                 String body = mapper.writeValueAsString(payload);
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest req = HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:8081/api/rooms/start"))
+                        .uri(URI.create(ServerConfig.getBackendUrl() + "/api/rooms/start"))
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(body))
                         .build();
@@ -357,7 +358,7 @@ public class JoinRoomController {
             try {
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest req = HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:8081/api/rooms/" + room.getRoomId() + "/sse"))
+                        .uri(URI.create(ServerConfig.getBackendUrl() + "/api/rooms/" + room.getRoomId() + "/sse"))
                         .GET()
                         .build();
 

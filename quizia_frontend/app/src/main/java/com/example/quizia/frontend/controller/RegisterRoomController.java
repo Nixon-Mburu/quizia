@@ -21,6 +21,7 @@ import java.net.http.HttpResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
+import com.example.quizia.frontend.config.ServerConfig;
 
 public class RegisterRoomController {
 
@@ -125,7 +126,7 @@ public class RegisterRoomController {
                 String body = mapper.writeValueAsString(payload);
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest req = HttpRequest.newBuilder()
-                        .uri(URI.create("http://localhost:8081/api/rooms/register"))
+                        .uri(URI.create(ServerConfig.getBackendUrl() + "/api/rooms/register"))
                         .header("Content-Type","application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(body))
                         .build();
