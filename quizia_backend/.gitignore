@@ -5,6 +5,14 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+# Built JAR files
+*.jar
+
+# Built distribution files
+*.deb
+*.exe
+*.msi
+
 ### STS ###
 .apt_generated
 .classpath
@@ -35,3 +43,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Database files
+*.db
+quizia.db
