@@ -3,8 +3,7 @@ services:
     name: quizia-backend
     env: docker
     plan: free
-    rootDir: quizia_backend
-    dockerfilePath: quizia_backend/Dockerfile
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: PORT
         value: 8080
