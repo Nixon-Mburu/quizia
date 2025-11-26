@@ -224,7 +224,15 @@ public class QuestionsController {
                     }
                     logDebug("parsed questions count: " + qlist.size());
                     questions.clear();
-                    questions.addAll(qlist);
+                    
+                    // Strictly limit to TOTAL_QUESTIONS (6)
+                    int limit = Math.min(TOTAL_QUESTIONS, qlist.size());
+                    for (int i = 0; i < limit; i++) {
+                        questions.add(qlist.get(i));
+                    }
+                    
+                    logDebug("Using " + questions.size() + " questions (limited to " + TOTAL_QUESTIONS + ")");
+                    
                     selectedAnswers.clear();
                     for (int i=0;i<questions.size();i++) selectedAnswers.add(null);
                     currentIndex = 0;
