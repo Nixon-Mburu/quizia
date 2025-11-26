@@ -19,7 +19,7 @@
             <!-- Current Room Members Section (when in a room) -->
             <VBox fx:id="currentMembersSection" spacing="8" style="-fx-padding: 16; -fx-background-color: #F0E6D2; -fx-background-radius: 12; -fx-border-color: #D4C4B0; -fx-border-width: 1;" managed="false" visible="false">
                 <Label text="Members in Room:" style="-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #2C1810;" />
-                <FlowPane fx:id="currentMembersChips" spacing="8" style="-fx-hgap: 8; -fx-vgap: 8;" />
+                <FlowPane fx:id="currentMembersChips" hgap="8" vgap="8" />
             </VBox>
             
             <!-- Cards Container with ScrollPane -->

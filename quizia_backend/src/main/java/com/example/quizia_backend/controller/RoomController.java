@@ -94,14 +94,15 @@ public class RoomController {
         String roomId = body.getOrDefault("roomId", "");
         if (roomId.isEmpty()) return ResponseEntity.badRequest().body("roomId required");
 
+        System.out.println("[RoomController] Broadcasting GAME_STARTED to room: " + roomId);
         List<SseEmitter> list = emitters.get(roomId);
         if (list != null) {
             for (SseEmitter e : list) {
                 try {
-                    SseEmitter.SseEventBuilder ev = SseEmitter.event().name("start").data("started");
+                    SseEmitter.SseEventBuilder ev = SseEmitter.event().name("start").data("GAME_STARTED");
                     e.send(ev);
                 } catch (Exception ex) {
-
+                    System.err.println("[RoomController] Error sending SSE: " + ex.getMessage());
                 }
             }
         }

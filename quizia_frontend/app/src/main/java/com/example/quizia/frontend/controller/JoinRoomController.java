@@ -62,16 +62,19 @@ public class JoinRoomController {
         fetchRoomsFromBackend();
         
         // Poll for room updates every 2 seconds for real-time member list updates
-        new Thread(() -> {
-            while (true) {
+        Thread pollingThread = new Thread(() -> {
+            while (!Thread.currentThread().isInterrupted()) {
                 try {
                     Thread.sleep(2000);
                     fetchRoomsFromBackend();
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     break;
                 }
             }
-        }).start();
+        });
+        pollingThread.setDaemon(true);
+        pollingThread.start();
 
 
         if (backButton != null) {
@@ -238,9 +241,11 @@ public class JoinRoomController {
         new Thread(() -> {
             try {
                 String url = ServerConfig.getBackendUrl() + "/api/rooms";
+                System.out.println("[JoinRoomController] Fetching rooms from: " + url);
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
                 HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
+                System.out.println("[JoinRoomController] Response status: " + resp.statusCode());
                 if (resp.statusCode() == 200) {
                     ObjectMapper mapper = new ObjectMapper();
                     List<java.util.Map<String,Object>> list = mapper.readValue(resp.body(), new TypeReference<List<java.util.Map<String,Object>>>(){});
@@ -260,14 +265,16 @@ public class JoinRoomController {
                         String createdBy = java.util.Objects.toString(m.getOrDefault("createdByUsername", m.getOrDefault("created_by_username", "")), "");
                         fetchedRooms.add(new Room(rid, rname, mc, mn, topics, createdBy));
                     }
+                    System.out.println("[JoinRoomController] Fetched " + fetchedRooms.size() + " rooms");
                     Platform.runLater(() -> {
                         rooms = fetchedRooms;
                         renderRoomCards();
                     });
                 } else {
-                    System.err.println("Failed to fetch rooms: " + resp.statusCode());
+                    System.err.println("[JoinRoomController] Failed to fetch rooms: " + resp.statusCode());
                 }
             } catch (Exception e) {
+                System.err.println("[JoinRoomController] Exception fetching rooms: " + e.getMessage());
                 e.printStackTrace();
             }
         }).start();
@@ -409,6 +416,7 @@ public class JoinRoomController {
 
         sseThread = new Thread(() -> {
             try {
+                System.out.println("[JoinRoomController] Starting SSE listener for room: " + room.getRoomId());
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest req = HttpRequest.newBuilder()
                         .uri(URI.create(ServerConfig.getBackendUrl() + "/api/rooms/" + room.getRoomId() + "/sse"))
@@ -419,9 +427,12 @@ public class JoinRoomController {
                     .thenAccept(resp -> {
                         resp.body().forEach(line -> {
                             if (!isWaitingInRoom) return;
+                            
+                            System.out.println("[JoinRoomController] SSE Event: " + line);
 
                             if (line.startsWith("data:")) {
                                 String data = line.substring(5).trim();
+                                System.out.println("[JoinRoomController] SSE Data: " + data);
 
 
                                 if (data.contains("USER_JOINED")) {
@@ -435,7 +446,7 @@ public class JoinRoomController {
                                         e.printStackTrace();
                                     }
                                 } else if (data.contains("GAME_STARTED")) {
-
+                                    System.out.println("[JoinRoomController] GAME_STARTED received, navigating to questions...");
                                     isWaitingInRoom = false;
                                     Platform.runLater(() -> {
                                         try {
