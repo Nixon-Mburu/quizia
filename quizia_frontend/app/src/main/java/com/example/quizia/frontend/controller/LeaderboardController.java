@@ -4,7 +4,6 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.AnchorPane;
@@ -28,11 +27,17 @@ public class LeaderboardController {
     @FXML private AnchorPane root;
     @FXML private Label firstName;
     @FXML private Label firstScore;
+    @FXML private Label firstTime;
     @FXML private Label secondName;
     @FXML private Label secondScore;
+    @FXML private Label secondTime;
     @FXML private Label thirdName;
     @FXML private Label thirdScore;
-    @FXML private VBox leaderboardList;
+    @FXML private Label thirdTime;
+    @FXML private VBox otherPlayersList;
+    @FXML private VBox bar1Container;
+    @FXML private VBox bar2Container;
+    @FXML private VBox bar3Container;
 
     private String roomId;
 
@@ -92,22 +97,30 @@ public class LeaderboardController {
                         if (rows.size() > 0) {
                             firstName.setText(rows.get(0).username);
                             firstScore.setText(rows.get(0).correct + " pts");
+                            firstTime.setText(formatTime(rows.get(0).totalTimeMs));
                         }
                         if (rows.size() > 1) {
                             secondName.setText(rows.get(1).username);
                             secondScore.setText(rows.get(1).correct + " pts");
+                            secondTime.setText(formatTime(rows.get(1).totalTimeMs));
                         }
                         if (rows.size() > 2) {
                             thirdName.setText(rows.get(2).username);
                             thirdScore.setText(rows.get(2).correct + " pts");
+                            thirdTime.setText(formatTime(rows.get(2).totalTimeMs));
                         }
                         
-                        // Populate leaderboard list (starting from rank 1)
-                        leaderboardList.getChildren().clear();
-                        for (int i = 0; i < rows.size(); i++) {
+                        // Adjust bar heights based on score
+                        if (rows.size() >= 3) {
+                            adjustBarHeights(rows.get(0).correct, rows.get(1).correct, rows.get(2).correct);
+                        }
+                        
+                        // Populate other players section (rank 4+)
+                        otherPlayersList.getChildren().clear();
+                        for (int i = 3; i < rows.size(); i++) {
                             ResultRow row = rows.get(i);
-                            HBox rowBox = createLeaderboardRow(i + 1, row);
-                            leaderboardList.getChildren().add(rowBox);
+                            VBox card = createPlayerCard(i + 1, row);
+                            otherPlayersList.getChildren().add(card);
                         }
                     });
                 } else {
@@ -121,35 +134,64 @@ public class LeaderboardController {
         }).start();
     }
 
-    private HBox createLeaderboardRow(int rank, ResultRow row) {
-        HBox rowBox = new HBox(12);
-        rowBox.setStyle("-fx-padding: 12 16; -fx-background-color: rgba(255, 255, 255, 0.1); -fx-background-radius: 8; -fx-alignment: center-left;");
+    private String formatTime(long totalTimeMs) {
+        long seconds = totalTimeMs / 1000;
+        long millis = totalTimeMs % 1000;
+        if (seconds == 0) {
+            return millis + "ms";
+        }
+        return seconds + "s " + millis + "ms";
+    }
+
+    private void adjustBarHeights(int first, int second, int third) {
+        // Calculate proportional heights based on scores
+        int maxScore = Math.max(first, Math.max(second, third));
+        if (maxScore == 0) return;
         
-        // Rank number
+        double bar1Height = 240 * ((double) first / maxScore);
+        double bar2Height = 240 * ((double) second / maxScore);
+        double bar3Height = 240 * ((double) third / maxScore);
+        
+        // Set minimum heights
+        bar1Height = Math.max(bar1Height, 180);
+        bar2Height = Math.max(bar2Height, 120);
+        bar3Height = Math.max(bar3Height, 100);
+        
+        bar1Container.setMinHeight(bar1Height);
+        bar2Container.setMinHeight(bar2Height);
+        bar3Container.setMinHeight(bar3Height);
+    }
+
+    private VBox createPlayerCard(int rank, ResultRow row) {
+        VBox card = new VBox(8);
+        card.setStyle("-fx-padding: 16; -fx-background-color: white; -fx-background-radius: 16; " +
+                "-fx-border-color: #2C1810; -fx-border-width: 1; " +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);");
+        
+        HBox topRow = new HBox(12);
+        topRow.setStyle("-fx-alignment: center-left;");
+        
         Label rankLabel = new Label(String.format("%02d", rank));
-        rankLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: white; -fx-min-width: 30;");
+        rankLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #667eea; -fx-min-width: 35;");
         
-        // User info section
         VBox userInfo = new VBox(2);
         Label nameLabel = new Label(row.username);
-        nameLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: white;");
-        Label pointsLabel = new Label(row.correct + " points");
-        pointsLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: rgba(255, 255, 255, 0.8);");
-        userInfo.getChildren().addAll(nameLabel, pointsLabel);
+        nameLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #2C1810;");
+        Label timeLabel = new Label("Time: " + formatTime(row.totalTimeMs));
+        timeLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #999;");
+        userInfo.getChildren().addAll(nameLabel, timeLabel);
         
-        // Spacer
         javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
         HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
         
-        // Crown icon for top 3
-        Label crownLabel = new Label("");
-        if (rank == 1) crownLabel.setText("👑");
-        else if (rank == 2) crownLabel.setText("🥈");
-        else if (rank == 3) crownLabel.setText("🥉");
-        crownLabel.setStyle("-fx-font-size: 16px; -fx-min-width: 30;");
+        Label pointsLabel = new Label(row.correct + " pts");
+        pointsLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #10B981; -fx-padding: 6 12; " +
+                "-fx-background-color: rgba(16, 185, 129, 0.1); -fx-background-radius: 8;");
         
-        rowBox.getChildren().addAll(rankLabel, userInfo, spacer, crownLabel);
-        return rowBox;
+        topRow.getChildren().addAll(rankLabel, userInfo, spacer, pointsLabel);
+        card.getChildren().add(topRow);
+        
+        return card;
     }
 
     public static class ResultRow {

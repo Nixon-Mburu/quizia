@@ -1,59 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.image.*?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.quizia.frontend.controller.LeaderboardController" stylesheets="@../styles/leaderboard.css" styleClass="root">
   <children>
-    <VBox spacing="0" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" style="-fx-background-color: #ff6b35; -fx-padding: 0;">
+    <VBox spacing="0" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" style="-fx-background-color: #faf8f3; -fx-padding: 0;">
       
-      <!-- Header with back button -->
-      <HBox spacing="12" style="-fx-padding: 16 24; -fx-alignment: center-left; -fx-background-color: rgba(255, 107, 53, 0.95);">
-        <Button fx:id="backBtn" text="← Leaderboard" style="-fx-font-size: 14px; -fx-padding: 8 16; -fx-background-color: white; -fx-text-fill: #ff6b35; -fx-font-weight: 700; -fx-background-radius: 8;" />
+      <!-- Header -->
+      <HBox spacing="12" style="-fx-padding: 20 30; -fx-alignment: center-left;">
+        <Button fx:id="backBtn" text="← Back" style="-fx-font-size: 13px; -fx-padding: 8 16; -fx-background-color: white; -fx-text-fill: #2C1810; -fx-font-weight: 600; -fx-border-color: #e0d5c8; -fx-border-width: 1; -fx-background-radius: 8;" />
+        <Label text="Leaderboard" style="-fx-font-size: 24px; -fx-font-weight: 700; -fx-text-fill: #2C1810;" />
       </HBox>
       
-      <!-- Main Content Card -->
-      <VBox spacing="20" style="-fx-padding: 40 24 24 24; -fx-alignment: top-center;" VBox.vgrow="ALWAYS">
-        
-        <!-- Podium Section -->
-        <VBox spacing="16" style="-fx-alignment: center;">
-          <!-- Podium Top 3 -->
-          <HBox spacing="16" style="-fx-alignment: bottom-center; -fx-padding: 20;">
-            
-            <!-- 2nd Place (Left Pillar) -->
-            <VBox spacing="12" style="-fx-alignment: center; -fx-padding: 16; -fx-background-color: #d4f1d4; -fx-background-radius: 12; -fx-min-width: 100; -fx-min-height: 180;">
-              <Label text="2" style="-fx-font-size: 20px; -fx-font-weight: 700; -fx-text-fill: #333;" />
-              <Label fx:id="secondName" text="---" style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #555; -fx-text-alignment: center;" wrapText="true" />
-              <Label fx:id="secondScore" text="-- pts" style="-fx-font-size: 11px; -fx-text-fill: #777;" />
-            </VBox>
-            
-            <!-- 1st Place (Center Pillar - Tallest) -->
-            <VBox spacing="12" style="-fx-alignment: center; -fx-padding: 20; -fx-background-color: #c8f1c8; -fx-background-radius: 12; -fx-min-width: 120; -fx-min-height: 240;">
-              <Label text="👑" style="-fx-font-size: 28px; -fx-text-alignment: center;" />
-              <Label text="1" style="-fx-font-size: 20px; -fx-font-weight: 700; -fx-text-fill: #333;" />
-              <Label fx:id="firstName" text="---" style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333; -fx-text-alignment: center; -fx-wrap-text: true;" wrapText="true" />
-              <Label fx:id="firstScore" text="-- pts" style="-fx-font-size: 12px; -fx-text-fill: #666; -fx-font-weight: 600;" />
-            </VBox>
-            
-            <!-- 3rd Place (Right Pillar) -->
-            <VBox spacing="12" style="-fx-alignment: center; -fx-padding: 16; -fx-background-color: #d4f1d4; -fx-background-radius: 12; -fx-min-width: 100; -fx-min-height: 160;">
-              <Label text="3" style="-fx-font-size: 20px; -fx-font-weight: 700; -fx-text-fill: #333;" />
-              <Label fx:id="thirdName" text="---" style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #555; -fx-text-alignment: center;" wrapText="true" />
-              <Label fx:id="thirdScore" text="-- pts" style="-fx-font-size: 11px; -fx-text-fill: #777;" />
-            </VBox>
-          </HBox>
-        </VBox>
-        
-        <!-- Leaderboard List -->
-        <VBox spacing="8" style="-fx-padding: 20 0 0 0;">
-          <Label text="Full Leaderboard" style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: white; -fx-padding: 0 0 12 0;" />
+      <!-- Main Content -->
+      <ScrollPane style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+        <VBox spacing="24" style="-fx-padding: 24 30 30 30; -fx-background-color: #faf8f3;">
           
-          <!-- Leaderboard Rows Container (ScrollPane for overflow) -->
-          <ScrollPane style="-fx-background-color: transparent; -fx-border-color: transparent;">
-            <VBox fx:id="leaderboardList" spacing="8" style="-fx-padding: 0;" />
-          </ScrollPane>
+          <!-- Podium Section with Bars -->
+          <VBox spacing="16" style="-fx-padding: 20; -fx-background-color: white; -fx-background-radius: 20; -fx-border-color: #2C1810; -fx-border-width: 2; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 4);">
+            <Label text="🏆 Top Rankings" style="-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #2C1810;" />
+            
+            <!-- Bars Container -->
+            <HBox spacing="20" style="-fx-alignment: flex-end; -fx-padding: 40 20 20 20; -fx-min-height: 300;">
+              
+              <!-- 2nd Place Bar -->
+              <VBox spacing="12" style="-fx-alignment: center; -fx-min-width: 120;">
+                <VBox style="-fx-background-color: #10B981; -fx-background-radius: 12 12 0 0; -fx-min-width: 100; -fx-min-height: 160; -fx-alignment: center; -fx-padding: 12;" fx:id="bar2Container">
+                  <Label text="2" style="-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: white;" />
+                </VBox>
+                <Label fx:id="secondName" text="---" style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #2C1810;" />
+                <Label fx:id="secondScore" text="-- pts" style="-fx-font-size: 11px; -fx-text-fill: #667eea;" />
+                <Label fx:id="secondTime" text="-- s" style="-fx-font-size: 10px; -fx-text-fill: #999;" />
+              </VBox>
+              
+              <!-- 1st Place Bar (Tallest) -->
+              <VBox spacing="12" style="-fx-alignment: center; -fx-min-width: 140;">
+                <VBox style="-fx-background-color: #059669; -fx-background-radius: 12 12 0 0; -fx-min-width: 120; -fx-min-height: 240; -fx-alignment: center; -fx-padding: 16;" fx:id="bar1Container">
+                  <Label text="👑" style="-fx-font-size: 24px; -fx-text-alignment: center;" />
+                  <Label text="1" style="-fx-font-size: 20px; -fx-font-weight: 700; -fx-text-fill: white; -fx-text-alignment: center;" />
+                </VBox>
+                <Label fx:id="firstName" text="---" style="-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #2C1810;" />
+                <Label fx:id="firstScore" text="-- pts" style="-fx-font-size: 12px; -fx-text-fill: #667eea; -fx-font-weight: 600;" />
+                <Label fx:id="firstTime" text="-- s" style="-fx-font-size: 11px; -fx-text-fill: #999;" />
+              </VBox>
+              
+              <!-- 3rd Place Bar -->
+              <VBox spacing="12" style="-fx-alignment: center; -fx-min-width: 120;">
+                <VBox style="-fx-background-color: #10B981; -fx-background-radius: 12 12 0 0; -fx-min-width: 100; -fx-min-height: 120; -fx-alignment: center; -fx-padding: 12;" fx:id="bar3Container">
+                  <Label text="3" style="-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: white;" />
+                </VBox>
+                <Label fx:id="thirdName" text="---" style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #2C1810;" />
+                <Label fx:id="thirdScore" text="-- pts" style="-fx-font-size: 11px; -fx-text-fill: #667eea;" />
+                <Label fx:id="thirdTime" text="-- s" style="-fx-font-size: 10px; -fx-text-fill: #999;" />
+              </VBox>
+            </HBox>
+          </VBox>
+          
+          <!-- Other Players Section -->
+          <VBox spacing="12" style="-fx-padding: 0;">
+            <Label text="Other Participants" style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #2C1810;" />
+            <VBox fx:id="otherPlayersList" spacing="12" />
+          </VBox>
+          
         </VBox>
-        
-      </VBox>
+      </ScrollPane>
     </VBox>
   </children>
 </AnchorPane>
