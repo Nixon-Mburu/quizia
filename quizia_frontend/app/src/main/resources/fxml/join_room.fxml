@@ -4,6 +4,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.geometry.Insets?>
 <AnchorPane fx:id="root" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.quizia.frontend.controller.JoinRoomController" stylesheets="@../styles/join_room.css" styleClass="root">
     <children>
@@ -13,6 +14,12 @@
                 <Label text="Discover Quiz Rooms" styleClass="page-title" style="-fx-font-size: 42px;" />
                 <Label text="Join a room and challenge your friends to an epic quiz battle" styleClass="page-subtitle" style="-fx-font-size: 18px;" />
                 <Label text="Select a room below to get started" styleClass="page-hint" style="-fx-font-size: 14px; -fx-padding: 8 0 0 0;" />
+            </VBox>
+            
+            <!-- Current Room Members Section (when in a room) -->
+            <VBox fx:id="currentMembersSection" spacing="8" style="-fx-padding: 16; -fx-background-color: #F0E6D2; -fx-background-radius: 12; -fx-border-color: #D4C4B0; -fx-border-width: 1;" managed="false" visible="false">
+                <Label text="Members in Room:" style="-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #2C1810;" />
+                <FlowPane fx:id="currentMembersChips" spacing="8" style="-fx-hgap: 8; -fx-vgap: 8;" />
             </VBox>
             
             <!-- Cards Container with ScrollPane -->

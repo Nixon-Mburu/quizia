@@ -67,7 +67,7 @@ public class QuestionsController {
     private String username = "";
     private long quizStartTime = 0L;
     private static final int QUESTION_TIMER_SECONDS = 10;
-    private static final int TOTAL_QUESTIONS = 5;
+    private static final int TOTAL_QUESTIONS = 6;
     private javafx.animation.Timeline timerTimeline;
 
 
@@ -325,6 +325,18 @@ public class QuestionsController {
                     timerLabel.setStyle("-fx-text-fill: #10B981;");
                 }
                 secondsRemaining[0]--;
+                
+                // Auto-advance to next question when time is up
+                if (secondsRemaining[0] < 0) {
+                    Platform.runLater(() -> {
+                        if (currentIndex < questions.size() - 1) {
+                            currentIndex++;
+                            showQuestion(currentIndex);
+                        } else {
+                            autoSubmitQuiz();
+                        }
+                    });
+                }
             }
         );
 

@@ -43,16 +43,35 @@ public class JoinRoomController {
 
     @FXML
     private AnchorPane root;
+    
+    @FXML
+    private VBox currentMembersSection;
+    
+    @FXML
+    private FlowPane currentMembersChips;
 
     private List<Room> rooms = new java.util.ArrayList<>();
     private String currentRoomId = null;
     private boolean isWaitingInRoom = false;
     private Thread sseThread = null;
+    private List<String> currentMembers = new java.util.ArrayList<>();
 
     @FXML
     private void initialize() {
 
         fetchRoomsFromBackend();
+        
+        // Poll for room updates every 2 seconds for real-time member list updates
+        new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(2000);
+                    fetchRoomsFromBackend();
+                } catch (InterruptedException e) {
+                    break;
+                }
+            }
+        }).start();
 
 
         if (backButton != null) {
@@ -115,6 +134,10 @@ public class JoinRoomController {
         } catch (Exception ex) { }
 
         for (Room room : rooms) {
+            // Update the current members display if we're in this room
+            if (isWaitingInRoom && currentRoomId != null && currentRoomId.equals(room.getRoomId())) {
+                updateCurrentMembersDisplay(room);
+            }
             VBox card = createRoomCard(room, currentUser);
             roomCardsContainer.getChildren().add(card);
         }
@@ -272,7 +295,15 @@ public class JoinRoomController {
                 HttpResponse<String> resp = client.send(req, HttpResponse.BodyHandlers.ofString());
                 if (resp.statusCode() >= 200 && resp.statusCode() < 300) {
 
-                    Platform.runLater(() -> showJoinNotification(payload.get("username") + " joined"));
+                    Platform.runLater(() -> {
+                        showJoinNotification(payload.get("username") + " joined");
+                        // Show the members section
+                        if (currentMembersSection != null) {
+                            currentMembersSection.setVisible(true);
+                            currentMembersSection.setManaged(true);
+                        }
+                        updateCurrentMembersDisplay(room);
+                    });
 
 
                     currentRoomId = room.getRoomId();
@@ -298,6 +329,28 @@ public class JoinRoomController {
                 });
             }
         }).start();
+    }
+    
+    private void updateCurrentMembersDisplay(Room room) {
+        if (currentMembersChips == null) return;
+        
+        currentMembers.clear();
+        if (room.getMemberNames() != null && !room.getMemberNames().trim().isEmpty()) {
+            String[] members = room.getMemberNames().split(",");
+            for (String member : members) {
+                currentMembers.add(member.trim());
+            }
+        }
+        
+        Platform.runLater(() -> {
+            currentMembersChips.getChildren().clear();
+            for (String memberName : currentMembers) {
+                Label chip = new Label(memberName);
+                chip.setStyle("-fx-background-color: #4F46E5; -fx-text-fill: white; " +
+                        "-fx-padding: 8 16; -fx-background-radius: 16px; -fx-font-size: 13px; -fx-font-weight: 600;");
+                currentMembersChips.getChildren().add(chip);
+            }
+        });
     }
 
     private void handleStartRoom(Room room) {
