@@ -325,18 +325,6 @@ public class QuestionsController {
                     timerLabel.setStyle("-fx-text-fill: #10B981;");
                 }
                 secondsRemaining[0]--;
-                
-                // Auto-advance to next question when time is up
-                if (secondsRemaining[0] < 0) {
-                    Platform.runLater(() -> {
-                        if (currentIndex < questions.size() - 1) {
-                            currentIndex++;
-                            showQuestion(currentIndex);
-                        } else {
-                            autoSubmitQuiz();
-                        }
-                    });
-                }
             }
         );
 
