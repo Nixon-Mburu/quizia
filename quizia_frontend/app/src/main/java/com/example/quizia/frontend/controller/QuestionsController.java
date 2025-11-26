@@ -331,6 +331,18 @@ public class QuestionsController {
 
         timerTimeline.getKeyFrames().add(keyFrame);
         timerLabel.setText(QUESTION_TIMER_SECONDS + "s");
+        
+        // Auto-advance when timer finishes
+        timerTimeline.setOnFinished(event -> {
+            logDebug("Timer finished for question " + (currentIndex + 1));
+            if (currentIndex < questions.size() - 1) {
+                currentIndex++;
+                showQuestion(currentIndex);
+            } else {
+                autoSubmitQuiz();
+            }
+        });
+        
         timerTimeline.play();
     }
 
