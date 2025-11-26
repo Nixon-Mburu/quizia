@@ -1,52 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.quizia.frontend.controller.LeaderboardController" stylesheets="@../styles/leaderboard.css" styleClass="root">
   <children>
-    <VBox spacing="24.0" AnchorPane.topAnchor="30.0" AnchorPane.leftAnchor="30.0" AnchorPane.rightAnchor="30.0" AnchorPane.bottomAnchor="30.0" style="-fx-padding: 0;">
-      <children>
-        <!-- Header -->
-        <VBox spacing="8">
-          <Label text="🏆 Here are the results" styleClass="page-title" />
-          <Label text="See how you ranked against your competitors" styleClass="page-subtitle" />
+    <VBox spacing="0" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" style="-fx-background-color: #ff6b35; -fx-padding: 0;">
+      
+      <!-- Header with back button -->
+      <HBox spacing="12" style="-fx-padding: 16 24; -fx-alignment: center-left; -fx-background-color: rgba(255, 107, 53, 0.95);">
+        <Button fx:id="backBtn" text="← Leaderboard" style="-fx-font-size: 14px; -fx-padding: 8 16; -fx-background-color: white; -fx-text-fill: #ff6b35; -fx-font-weight: 700; -fx-background-radius: 8;" />
+      </HBox>
+      
+      <!-- Main Content Card -->
+      <VBox spacing="20" style="-fx-padding: 40 24 24 24; -fx-alignment: top-center;" VBox.vgrow="ALWAYS">
+        
+        <!-- Podium Section -->
+        <VBox spacing="16" style="-fx-alignment: center;">
+          <!-- Podium Top 3 -->
+          <HBox spacing="16" style="-fx-alignment: bottom-center; -fx-padding: 20;">
+            
+            <!-- 2nd Place (Left Pillar) -->
+            <VBox spacing="12" style="-fx-alignment: center; -fx-padding: 16; -fx-background-color: #d4f1d4; -fx-background-radius: 12; -fx-min-width: 100; -fx-min-height: 180;">
+              <Label text="2" style="-fx-font-size: 20px; -fx-font-weight: 700; -fx-text-fill: #333;" />
+              <Label fx:id="secondName" text="---" style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #555; -fx-text-alignment: center;" wrapText="true" />
+              <Label fx:id="secondScore" text="-- pts" style="-fx-font-size: 11px; -fx-text-fill: #777;" />
+            </VBox>
+            
+            <!-- 1st Place (Center Pillar - Tallest) -->
+            <VBox spacing="12" style="-fx-alignment: center; -fx-padding: 20; -fx-background-color: #c8f1c8; -fx-background-radius: 12; -fx-min-width: 120; -fx-min-height: 240;">
+              <Label text="👑" style="-fx-font-size: 28px; -fx-text-alignment: center;" />
+              <Label text="1" style="-fx-font-size: 20px; -fx-font-weight: 700; -fx-text-fill: #333;" />
+              <Label fx:id="firstName" text="---" style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #333; -fx-text-alignment: center; -fx-wrap-text: true;" wrapText="true" />
+              <Label fx:id="firstScore" text="-- pts" style="-fx-font-size: 12px; -fx-text-fill: #666; -fx-font-weight: 600;" />
+            </VBox>
+            
+            <!-- 3rd Place (Right Pillar) -->
+            <VBox spacing="12" style="-fx-alignment: center; -fx-padding: 16; -fx-background-color: #d4f1d4; -fx-background-radius: 12; -fx-min-width: 100; -fx-min-height: 160;">
+              <Label text="3" style="-fx-font-size: 20px; -fx-font-weight: 700; -fx-text-fill: #333;" />
+              <Label fx:id="thirdName" text="---" style="-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #555; -fx-text-alignment: center;" wrapText="true" />
+              <Label fx:id="thirdScore" text="-- pts" style="-fx-font-size: 11px; -fx-text-fill: #777;" />
+            </VBox>
+          </HBox>
         </VBox>
         
-        <!-- Podium Structure for Top 3 -->
-        <HBox spacing="20" style="-fx-alignment: center; -fx-padding: 20; -fx-alignment: bottom-center;">
-          <!-- 2nd Place (Left) -->
-          <VBox spacing="8" styleClass="podium-position rank-2" style="-fx-padding: 20; -fx-alignment: center;">
-            <Label text="2" styleClass="rank-number" />
-            <Label fx:id="second" text="---" styleClass="rank-name" wrapText="true" />
-            <Label fx:id="secondScore" text="-- pts" styleClass="rank-score" />
-          </VBox>
+        <!-- Leaderboard List -->
+        <VBox spacing="8" style="-fx-padding: 20 0 0 0;">
+          <Label text="Full Leaderboard" style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: white; -fx-padding: 0 0 12 0;" />
           
-          <!-- 1st Place (Center) -->
-          <VBox spacing="8" styleClass="podium-position rank-1" style="-fx-padding: 20; -fx-alignment: center;">
-            <Label text="👑 1" styleClass="rank-number" />
-            <Label fx:id="first" text="---" styleClass="rank-name" wrapText="true" />
-            <Label fx:id="firstScore" text="-- pts" styleClass="rank-score" />
-          </VBox>
-          
-          <!-- 3rd Place (Right) -->
-          <VBox spacing="8" styleClass="podium-position rank-3" style="-fx-padding: 20; -fx-alignment: center;">
-            <Label text="3" styleClass="rank-number" />
-            <Label fx:id="third" text="---" styleClass="rank-name" wrapText="true" />
-            <Label fx:id="thirdScore" text="-- pts" styleClass="rank-score" />
-          </VBox>
-        </HBox>
-        
-        <!-- Full Leaderboard Table -->
-        <VBox spacing="12" style="-fx-padding: 20 0 0 0;">
-          <Label text="Full Leaderboard" styleClass="section-title" />
-          <TableView fx:id="leaderboardTable" prefHeight="300.0" VBox.vgrow="ALWAYS" styleClass="leaderboard-table">
-          </TableView>
+          <!-- Leaderboard Rows Container (ScrollPane for overflow) -->
+          <ScrollPane style="-fx-background-color: transparent; -fx-border-color: transparent;">
+            <VBox fx:id="leaderboardList" spacing="8" style="-fx-padding: 0;" />
+          </ScrollPane>
         </VBox>
         
-        <!-- Footer Buttons -->
-        <HBox spacing="12" style="-fx-padding: 16 0 0 0;">
-          <Button fx:id="backBtn" text="← Back to Rooms" styleClass="btn-secondary" />
-        </HBox>
-      </children>
+      </VBox>
     </VBox>
   </children>
 </AnchorPane>
