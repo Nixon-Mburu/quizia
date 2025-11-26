@@ -15,6 +15,9 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
@@ -33,6 +36,12 @@ public class RoomController {
     private final Map<String, List<com.example.quizia_backend.model.Question>> roomQuestions = new ConcurrentHashMap<>();
     private final Map<String, Map<Integer, Set<String>>> roomAnswers = new ConcurrentHashMap<>();
     private final Map<String, List<SseEmitter>> syncEmitters = new ConcurrentHashMap<>();
+    
+    // Track question timers for auto-advance
+    private final Map<String, Map<Integer, Long>> questionStartTimes = new ConcurrentHashMap<>();
+    private final Map<String, Integer> currentQuestionIndex = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService timerExecutor = Executors.newScheduledThreadPool(5);
+    private final static int QUESTION_TIMER_SECONDS = 10;
 
     public RoomController(RoomRepository roomRepository, RoomMemberRepository memberRepository,
                          com.example.quizia_backend.repository.QuestionRepository questionRepository) {
@@ -152,13 +161,23 @@ public class RoomController {
 
                 java.util.Collections.shuffle(allQuestions);
                 List<com.example.quizia_backend.model.Question> selected = allQuestions.stream()
-                    .limit(5)
+                    .limit(6)
                     .collect(java.util.stream.Collectors.toList());
 
                 roomQuestions.put(roomId, selected);
 
 
                 roomAnswers.putIfAbsent(roomId, new ConcurrentHashMap<>());
+                
+                // Schedule auto-advance for the first question
+                String timerKey = roomId + "_Q0";
+                if (!currentQuestionIndex.containsKey(timerKey)) {
+                    currentQuestionIndex.put(timerKey, 1);
+                    timerExecutor.schedule(() -> {
+                        broadcastToSync(roomId, "NEXT_QUESTION:0");
+                        currentQuestionIndex.remove(timerKey);
+                    }, QUESTION_TIMER_SECONDS, java.util.concurrent.TimeUnit.SECONDS);
+                }
             }
 
             return ResponseEntity.ok(roomQuestions.get(roomId));
@@ -191,9 +210,20 @@ public class RoomController {
 
             System.out.println("[Room " + roomId + "] Question " + questionIndex + ": " + answeredCount + "/" + memberCount + " answered");
 
+            // Broadcast NEXT_QUESTION if all members have answered
             if (answeredCount >= memberCount && memberCount > 0) {
-
                 broadcastToSync(roomId, "NEXT_QUESTION:" + questionIndex);
+            }
+            
+            // Schedule auto-advance after 10 seconds if not already scheduled
+            String timerKey = roomId + "_Q" + questionIndex;
+            if (!currentQuestionIndex.containsKey(timerKey)) {
+                currentQuestionIndex.put(timerKey, 1); // Mark as scheduled
+                timerExecutor.schedule(() -> {
+                    // Auto-advance after 10 seconds
+                    broadcastToSync(roomId, "NEXT_QUESTION:" + questionIndex);
+                    currentQuestionIndex.remove(timerKey);
+                }, QUESTION_TIMER_SECONDS, java.util.concurrent.TimeUnit.SECONDS);
             }
 
             return ResponseEntity.ok().build();
