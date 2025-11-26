@@ -18,13 +18,14 @@ CREATE TABLE IF NOT EXISTS rooms (
   FOREIGN KEY(created_by) REFERENCES users(user_id)
 );
 
--- registered_rooms table with five columns (room_id, room_name, member_count, member_names, created_at)
+-- registered_rooms table with six columns (room_id, room_name, member_count, member_names, topics, created_by_username, created_at)
 CREATE TABLE IF NOT EXISTS registered_rooms (
   room_id TEXT PRIMARY KEY,
   room_name TEXT NOT NULL,
   member_count INTEGER DEFAULT 0,
   member_names TEXT,
   topics TEXT,
+  created_by_username TEXT,
   created_at TEXT
 );
 
@@ -60,8 +61,8 @@ INSERT OR IGNORE INTO rooms (room_id, room_name, created_by, created_at) VALUES 
 INSERT OR IGNORE INTO rooms (room_id, room_name, created_by, created_at) VALUES ('R002','Science League','2', datetime('now'));
 
 -- Seed registered_rooms equivalent rows (member_names comma-separated)
-INSERT OR IGNORE INTO registered_rooms (room_id, room_name, member_count, member_names, topics, created_at) VALUES ('R001','General Trivia',3,'alice,bob,charlie','General Knowledge', datetime('now'));
-INSERT OR IGNORE INTO registered_rooms (room_id, room_name, member_count, member_names, topics, created_at) VALUES ('R002','Science League',1,'bob','Science & Technology', datetime('now'));
+INSERT OR IGNORE INTO registered_rooms (room_id, room_name, member_count, member_names, topics, created_by_username, created_at) VALUES ('R001','General Trivia',3,'alice,bob,charlie','General Knowledge', 'alice', datetime('now'));
+INSERT OR IGNORE INTO registered_rooms (room_id, room_name, member_count, member_names, topics, created_by_username, created_at) VALUES ('R002','Science League',1,'bob','Science & Technology', 'bob', datetime('now'));
 
 -- Questions seed: 6 topics x 30 = 180 questions
 -- Topic: General Knowledge (30)

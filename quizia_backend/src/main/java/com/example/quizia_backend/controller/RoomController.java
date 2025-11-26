@@ -68,6 +68,7 @@ public class RoomController {
             } catch (Exception ex) {
 
             }
+            System.out.println("[RoomController] Listing room: " + r.getRoomName() + " | Creator: " + r.getCreatedByUsername() + " | Members: " + r.getMemberNames());
         }
         return rooms;
     }
@@ -82,9 +83,11 @@ public class RoomController {
             return ResponseEntity.badRequest().body("roomName required");
         }
         try {
+            System.out.println("[RoomController] Registering room: " + room.getRoomName() + " | Creator: " + room.getCreatedByUsername() + " | RoomId: " + room.getRoomId());
             roomRepository.addRoom(room);
             return ResponseEntity.status(201).build();
         } catch (Exception ex) {
+            System.out.println("[RoomController] Error registering room: " + ex.getMessage());
             return ResponseEntity.status(500).body("could not register room: " + ex.getMessage());
         }
     }

@@ -133,14 +133,20 @@ public class JoinRoomController {
         String currentUser = "";
         try {
             java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(getClass());
-            currentUser = prefs.get("quizia.username", "");
-        } catch (Exception ex) { }
+            currentUser = prefs.get("quizia.username", "").trim();
+            System.out.println("[DEBUG] renderRoomCards - currentUser from prefs: '" + currentUser + "'");
+        } catch (Exception ex) {
+            System.out.println("[ERROR] Failed to get username from prefs: " + ex.getMessage());
+        }
 
         for (Room room : rooms) {
             // Update the current members display if we're in this room
             if (isWaitingInRoom && currentRoomId != null && currentRoomId.equals(room.getRoomId())) {
                 updateCurrentMembersDisplay(room);
             }
+            // Debug: Check if this is creator's room
+            String createdBy = room.getCreatedByUsername() != null ? room.getCreatedByUsername() : "null";
+            System.out.println("[DEBUG] Room: " + room.getRoomName() + " | Created by: '" + createdBy + "' | Current user: '" + currentUser + "' | IsCreator: " + (room.getCreatedByUsername() != null && !room.getCreatedByUsername().isEmpty() && room.getCreatedByUsername().equals(currentUser)));
             VBox card = createRoomCard(room, currentUser);
             roomCardsContainer.getChildren().add(card);
         }
@@ -221,7 +227,12 @@ public class JoinRoomController {
                 !room.getCreatedByUsername().isEmpty() &&
                 room.getCreatedByUsername().equals(currentUser);
 
+        System.out.println("[DEBUG] createRoomCard - Room: " + room.getRoomName() + " | isCreator: " + isCreator + 
+                " | room creator: '" + (room.getCreatedByUsername() != null ? room.getCreatedByUsername() : "null") + 
+                "' | currentUser: '" + currentUser + "'");
+
         if (isCreator) {
+            System.out.println("[DEBUG] Adding Start Quiz button for creator: " + currentUser);
             Button startBtn = new Button("Start Quiz ▶");
             startBtn.getStyleClass().add("btn-success");
             startBtn.setStyle("-fx-background-color: linear-gradient(#10B981, #059669); " +
@@ -230,6 +241,8 @@ public class JoinRoomController {
                     "-fx-effect: dropshadow(gaussian, rgba(16,185,129,0.3), 10, 0, 0, 3);");
             startBtn.setOnAction(e -> handleStartRoom(room));
             actionsBox.getChildren().add(startBtn);
+        } else {
+            System.out.println("[DEBUG] NOT a creator - button NOT added");
         }
 
         card.getChildren().addAll(header, topicsBox, membersBox, membersChips, creatorBox, actionsBox);

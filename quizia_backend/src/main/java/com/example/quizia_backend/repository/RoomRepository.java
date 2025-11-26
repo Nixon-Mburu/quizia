@@ -45,12 +45,14 @@ public class RoomRepository {
     }
 
     public int addRoom(Room room) {
-        String sql = "INSERT OR REPLACE INTO registered_rooms (room_id, room_name, member_count, member_names, topics, created_at) VALUES (?, ?, ?, ?, ?, datetime('now'))";
+        String sql = "INSERT OR REPLACE INTO registered_rooms (room_id, room_name, member_count, member_names, topics, created_by_username, created_at) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))";
 
         String mids = room.getMemberNames();
         if (mids == null) mids = "";
         String topics = room.getTopics();
         if (topics == null) topics = "";
-        return jdbc.update(sql, room.getRoomId(), room.getRoomName(), room.getMemberCount(), mids, topics);
+        String createdBy = room.getCreatedByUsername();
+        if (createdBy == null) createdBy = "";
+        return jdbc.update(sql, room.getRoomId(), room.getRoomName(), room.getMemberCount(), mids, topics, createdBy);
     }
 }

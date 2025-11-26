@@ -45,11 +45,25 @@ public class AuthController {
 
     @FXML
     private void goToRegisterRoom(ActionEvent event) {
+        // Ensure username is saved before switching scene
+        String username = usernameField.getText().trim();
+        if (username != null && !username.isEmpty()) {
+            Preferences prefs = Preferences.userNodeForPackage(getClass());
+            prefs.put("quizia.username", username);
+            System.out.println("[DEBUG] AuthController.goToRegisterRoom - Saved username: '" + username + "'");
+        }
         switchScene("/fxml/register_room.fxml");
     }
 
     @FXML
     private void goToJoinRoom(ActionEvent event) {
+        // Ensure username is saved before switching scene
+        String username = usernameField.getText().trim();
+        if (username != null && !username.isEmpty()) {
+            Preferences prefs = Preferences.userNodeForPackage(getClass());
+            prefs.put("quizia.username", username);
+            System.out.println("[DEBUG] AuthController.goToJoinRoom - Saved username: '" + username + "'");
+        }
         switchScene("/fxml/join_room.fxml");
     }
 
