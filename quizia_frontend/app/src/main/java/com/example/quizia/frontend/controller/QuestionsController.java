@@ -186,7 +186,8 @@ public class QuestionsController {
         new Thread(() -> {
             try {
                 logDebug("fetchQuestionsForTopic() starting for room=" + roomId);
-                String url = ServerConfig.getBackendUrl() + "/api/questions?room=" + roomId + "&topic=" + topic;
+                String encodedTopic = java.net.URLEncoder.encode(topic, "UTF-8");
+                String url = ServerConfig.getBackendUrl() + "/api/questions?room=" + roomId + "&topic=" + encodedTopic;
                 logDebug("GET " + url);
                 HttpClient client = HttpClient.newHttpClient();
                 HttpRequest req = HttpRequest.newBuilder()
