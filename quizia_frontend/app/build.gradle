@@ -70,14 +70,15 @@ tasks.named('run') {
 }
 
 tasks.register('fatJar', Jar) {
-    archiveFileName = 'quizia-frontend-all.jar'
+    archiveFileName = 'quizia.jar'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
-        attributes 'Main-Class': 'com.example.quizia.frontend.App'
+        attributes 'Main-Class': 'com.example.quizia.frontend.App',
+                   'Add-Modules': 'javafx.controls,javafx.fxml'
     }
     from sourceSets.main.output
     from {
-        configurations.runtimeClasspath.files.findAll { !it.name.contains('javafx') }.collect { zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
 
