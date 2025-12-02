@@ -5,7 +5,6 @@ plugins {
 	id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
-
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 description = 'Demo project for Spring Boot'
@@ -23,6 +22,7 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
 	implementation 'org.xerial:sqlite-jdbc:3.42.0.0'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -30,4 +30,11 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// Configure compileJava task for faster builds
+tasks.withType(JavaCompile) {
+	options.incremental = true
+	options.fork = true
+	options.forkOptions.memoryMaximumSize = '2g'
 }

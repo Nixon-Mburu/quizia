@@ -63,6 +63,16 @@ CREATE TABLE IF NOT EXISTS answers (
   submitted_at TEXT DEFAULT (datetime('now'))
 );
 
+-- Create indexes for performance optimization
+CREATE INDEX IF NOT EXISTS idx_rooms_created_by ON rooms(created_by);
+CREATE INDEX IF NOT EXISTS idx_registered_rooms_created_by ON registered_rooms(created_by_username);
+CREATE INDEX IF NOT EXISTS idx_results_room_id ON results(room_id);
+CREATE INDEX IF NOT EXISTS idx_results_username ON results(username);
+CREATE INDEX IF NOT EXISTS idx_results_room_username ON results(room_id, username);
+CREATE INDEX IF NOT EXISTS idx_answers_room_id ON answers(room_id);
+CREATE INDEX IF NOT EXISTS idx_answers_username ON answers(username);
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+
 -- Seed a few example users
 INSERT OR IGNORE INTO users (user_id, username) VALUES (1, 'alice');
 INSERT OR IGNORE INTO users (user_id, username) VALUES (2, 'bob');

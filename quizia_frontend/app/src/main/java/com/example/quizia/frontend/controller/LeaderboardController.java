@@ -50,10 +50,12 @@ public class LeaderboardController {
     private void initialize() {
         backBtn.setOnAction(e -> {
             try {
-                Parent page = FXMLLoader.load(getClass().getResource("/fxml/join_room.fxml"));
+                System.out.println("[LeaderboardController] Back button clicked - navigating to auth.fxml");
+                Parent page = FXMLLoader.load(getClass().getResource("/fxml/auth.fxml"));
                 Stage stage = (Stage) root.getScene().getWindow();
                 stage.setScene(new Scene(page));
             } catch (IOException ex) {
+                System.err.println("[LeaderboardController] Failed to navigate back: " + ex.getMessage());
                 ex.printStackTrace();
             }
         });
@@ -83,21 +85,32 @@ public class LeaderboardController {
                         // Check if this is a placeholder result (user hasn't completed quiz)
                         boolean hasCompleted = totalTime > 0 || correct > 0;
                         
+                        System.out.println("[LeaderboardController] User: " + username + ", Correct: " + correct + ", Time: " + totalTime + "ms, Completed: " + hasCompleted);
+                        
                         // Fetch detailed per-question timing only if user has completed
                         List<AnswerDetail> answerDetails = hasCompleted ? fetchAnswerDetails(username) : new java.util.ArrayList<>();
                         
                         return new ResultRow(username, correct, totalTime, answerDetails, hasCompleted);
                     }).collect(Collectors.toList());
                     
-                    // Sort by correct (descending), then by time (ascending)
+                    // Sort by: hasCompleted (completed first), then by correct (descending), then by time (ascending)
                     rows.sort((a, b) -> {
+                        // Completed quizzes come first
+                        if (a.hasCompleted != b.hasCompleted) {
+                            return a.hasCompleted ? -1 : 1;
+                        }
+                        // If both completed or both not completed, sort by correct score (descending)
                         if (b.correct != a.correct) {
                             return Integer.compare(b.correct, a.correct);
                         }
+                        // If same correct score, sort by time (ascending - faster is better)
                         return Long.compare(a.totalTimeMs, b.totalTimeMs);
                     });
                     
-                    System.out.println("[LeaderboardController] Sorted results: " + rows.size());
+                    System.out.println("[LeaderboardController] Sorted results: " + rows.size() + " total rows");
+                    for (int i = 0; i < rows.size(); i++) {
+                        System.out.println("[LeaderboardController] Rank " + (i+1) + ": " + rows.get(i).username + " (" + rows.get(i).correct + " correct, " + rows.get(i).totalTimeMs + "ms, completed: " + rows.get(i).hasCompleted + ")");
+                    }
                     
                     Platform.runLater(() -> {
                         // Populate podium
@@ -132,6 +145,8 @@ public class LeaderboardController {
                             VBox card = createPlayerCard(i + 1, row);
                             otherPlayersList.getChildren().add(card);
                         }
+                        
+                        System.out.println("[LeaderboardController] UI Updated - " + otherPlayersList.getChildren().size() + " additional players shown");
                     });
                 } else {
                     System.err.println("[LeaderboardController] Failed to fetch leaderboard: " + resp.statusCode());
@@ -171,12 +186,20 @@ public class LeaderboardController {
     }
 
     private String formatTime(long totalTimeMs) {
-        long seconds = totalTimeMs / 1000;
-        long millis = totalTimeMs % 1000;
-        if (seconds == 0) {
-            return millis + "ms";
+        if (totalTimeMs == 0) {
+            return "0s";
         }
-        return seconds + "s " + millis + "ms";
+        long seconds = totalTimeMs / 1000;
+        long minutes = seconds / 60;
+        long remainingSeconds = seconds % 60;
+        
+        if (minutes > 0) {
+            return minutes + "m " + remainingSeconds + "s";
+        } else if (seconds > 0) {
+            return seconds + "s";
+        } else {
+            return totalTimeMs + "ms";
+        }
     }
 
     private void adjustBarHeights(int first, int second, int third) {
