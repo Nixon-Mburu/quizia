@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.quizia.frontend.controller.LeaderboardController" stylesheets="@../styles/leaderboard.css" styleClass="root">
+  <children>
+    <VBox spacing="0" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" style="-fx-background-color: linear-gradient(to bottom, #F5E6D3, #F0E4D7); -fx-padding: 0;">
+
+      <!-- Header with Trophy Icon -->
+      <HBox spacing="16" style="-fx-padding: 24 32; -fx-alignment: center-left; -fx-background-color: rgba(255,255,255,0.8); -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);">
+        <Button fx:id="backBtn" text="← Back" style="-fx-font-size: 14px; -fx-padding: 10 18; -fx-background-color: white; -fx-text-fill: #2C1810; -fx-font-weight: 600; -fx-border-color: #e0d5c8; -fx-border-width: 1; -fx-background-radius: 12; -fx-border-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0, 0, 1);" />
+        <Label text="🏆" style="-fx-font-size: 28px;" />
+        <VBox spacing="2" style="-fx-alignment: center-left;">
+          <Label text="Leaderboard" style="-fx-font-size: 28px; -fx-font-weight: 800; -fx-text-fill: #2C1810;" />
+          <Label text="Champions of the Quiz" style="-fx-font-size: 12px; -fx-text-fill: #5C4A3A; -fx-font-weight: 500;" />
+        </VBox>
+      </HBox>
+
+      <!-- Main Content -->
+      <ScrollPane style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+        <VBox spacing="32" style="-fx-padding: 32 32 40 32; -fx-background-color: transparent; -fx-alignment: top-center;">
+
+          <!-- Podium Section with Enhanced Design -->
+          <VBox spacing="24" style="-fx-padding: 48 48 40 48; -fx-background-color: white; -fx-background-radius: 24; -fx-border-color: rgba(44,24,16,0.1); -fx-border-width: 2; -fx-border-radius: 24; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 20, 0, 0, 6); -fx-min-width: 1000; -fx-pref-width: 1000;">
+            <HBox spacing="16" style="-fx-alignment: center; -fx-padding: 0 0 16 0;">
+              <Label text="🥇" style="-fx-font-size: 24px;" />
+              <Label text="Hall of Fame" style="-fx-font-size: 24px; -fx-font-weight: 800; -fx-text-fill: #2C1810;" />
+              <Label text="🥇" style="-fx-font-size: 24px;" />
+            </HBox>
+
+            <!-- Enhanced Bars Container with Better Spacing -->
+            <HBox spacing="40" style="-fx-alignment: flex-end; -fx-padding: 60 50 40 50; -fx-min-height: 450; -fx-pref-height: 450;">
+
+              <!-- 2nd Place Bar - Silver -->
+              <VBox spacing="20" style="-fx-alignment: center; -fx-min-width: 160;">
+                <VBox style="-fx-background-color: linear-gradient(to bottom, #E5E7EB, #9CA3AF, #6B7280); -fx-background-radius: 16 16 0 0; -fx-min-width: 160; -fx-min-height: 220; -fx-alignment: center; -fx-padding: 20; -fx-border-color: rgba(255,255,255,0.3); -fx-border-width: 2; -fx-border-radius: 16 16 0 0; -fx-effect: dropshadow(gaussian, rgba(107,114,128,0.3), 8, 0, 0, 2);" fx:id="bar2Container">
+                  <Label text="🥈" style="-fx-font-size: 36px; -fx-text-alignment: center;" />
+                  <Label text="2" style="-fx-font-size: 26px; -fx-font-weight: 800; -fx-text-fill: white; -fx-text-alignment: center; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 2, 0, 0, 1);" />
+                </VBox>
+                <VBox spacing="4" style="-fx-alignment: center; -fx-padding: 16 12; -fx-background-color: rgba(255,255,255,0.9); -fx-background-radius: 12; -fx-border-color: rgba(107,114,128,0.2); -fx-border-width: 1; -fx-border-radius: 12;">
+                  <Label fx:id="secondName" text="---" style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #2C1810; -fx-text-alignment: center;" />
+                  <Label fx:id="secondScore" text="-- pts" style="-fx-font-size: 15px; -fx-text-fill: #059669; -fx-font-weight: 700;" />
+                  <Label fx:id="secondTime" text="-- s" style="-fx-font-size: 13px; -fx-text-fill: #6B7280;" />
+                </VBox>
+              </VBox>
+
+              <!-- 1st Place Bar - Gold (Tallest) -->
+              <VBox spacing="20" style="-fx-alignment: center; -fx-min-width: 180;">
+                <VBox style="-fx-background-color: linear-gradient(to bottom, #FFD700, #FFA500, #FF8C00); -fx-background-radius: 20 20 0 0; -fx-min-width: 180; -fx-min-height: 340; -fx-alignment: center; -fx-padding: 24; -fx-border-color: rgba(255,255,255,0.4); -fx-border-width: 3; -fx-border-radius: 20 20 0 0; -fx-effect: dropshadow(gaussian, rgba(255,215,0,0.4), 12, 0, 0, 3);" fx:id="bar1Container">
+                  <Label text="👑" style="-fx-font-size: 42px; -fx-text-alignment: center;" />
+                  <Label text="🥇" style="-fx-font-size: 38px; -fx-text-alignment: center;" />
+                  <Label text="1" style="-fx-font-size: 28px; -fx-font-weight: 800; -fx-text-fill: white; -fx-text-alignment: center; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.7), 3, 0, 0, 1);" />
+                </VBox>
+                <VBox spacing="4" style="-fx-alignment: center; -fx-padding: 20 16; -fx-background-color: rgba(255,255,255,0.95); -fx-background-radius: 16; -fx-border-color: rgba(255,215,0,0.3); -fx-border-width: 2; -fx-border-radius: 16; -fx-effect: dropshadow(gaussian, rgba(255,215,0,0.2), 6, 0, 0, 2);">
+                  <Label fx:id="firstName" text="---" style="-fx-font-size: 18px; -fx-font-weight: 800; -fx-text-fill: #2C1810; -fx-text-alignment: center;" />
+                  <Label fx:id="firstScore" text="-- pts" style="-fx-font-size: 16px; -fx-text-fill: #059669; -fx-font-weight: 700;" />
+                  <Label fx:id="firstTime" text="-- s" style="-fx-font-size: 14px; -fx-text-fill: #6B7280;" />
+                </VBox>
+              </VBox>
+
+              <!-- 3rd Place Bar - Bronze -->
+              <VBox spacing="20" style="-fx-alignment: center; -fx-min-width: 160;">
+                <VBox style="-fx-background-color: linear-gradient(to bottom, #D97706, #B45309, #92400E); -fx-background-radius: 16 16 0 0; -fx-min-width: 160; -fx-min-height: 180; -fx-alignment: center; -fx-padding: 20; -fx-border-color: rgba(255,255,255,0.3); -fx-border-width: 2; -fx-border-radius: 16 16 0 0; -fx-effect: dropshadow(gaussian, rgba(146,64,14,0.3), 8, 0, 0, 2);" fx:id="bar3Container">
+                  <Label text="🥉" style="-fx-font-size: 36px; -fx-text-alignment: center;" />
+                  <Label text="3" style="-fx-font-size: 26px; -fx-font-weight: 800; -fx-text-fill: white; -fx-text-alignment: center; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 2, 0, 0, 1);" />
+                </VBox>
+                <VBox spacing="4" style="-fx-alignment: center; -fx-padding: 16 12; -fx-background-color: rgba(255,255,255,0.9); -fx-background-radius: 12; -fx-border-color: rgba(146,64,14,0.2); -fx-border-width: 1; -fx-border-radius: 12;">
+                  <Label fx:id="thirdName" text="---" style="-fx-font-size: 16px; -fx-font-weight: 700; -fx-text-fill: #2C1810; -fx-text-alignment: center;" />
+                  <Label fx:id="thirdScore" text="-- pts" style="-fx-font-size: 15px; -fx-text-fill: #059669; -fx-font-weight: 700;" />
+                  <Label fx:id="thirdTime" text="-- s" style="-fx-font-size: 13px; -fx-text-fill: #6B7280;" />
+                </VBox>
+              </VBox>
+            </HBox>
+
+            <!-- Decorative Elements -->
+            <HBox spacing="20" style="-fx-alignment: center; -fx-padding: 16 0;">
+              <Rectangle width="60" height="3" fill="#FFD700" opacity="0.6" />
+              <Label text="⭐" style="-fx-font-size: 16px;" />
+              <Label text="Champions Circle" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #2C1810;" />
+              <Label text="⭐" style="-fx-font-size: 16px;" />
+              <Rectangle width="60" height="3" fill="#FFD700" opacity="0.6" />
+            </HBox>
+          </VBox>
+
+          <!-- Other Players Section with Enhanced Design -->
+          <VBox spacing="16" style="-fx-padding: 0;">
+            <HBox spacing="12" style="-fx-alignment: center;">
+              <Label text="📊" style="-fx-font-size: 18px;" />
+              <Label text="Other Participants" style="-fx-font-size: 18px; -fx-font-weight: 700; -fx-text-fill: #2C1810;" />
+            </HBox>
+            <VBox fx:id="otherPlayersList" spacing="12" style="-fx-background-color: white; -fx-background-radius: 16; -fx-border-color: rgba(44,24,16,0.1); -fx-border-width: 1; -fx-border-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);" />
+          </VBox>
+
+        </VBox>
+      </ScrollPane>
+    </VBox>
+  </children>
+</AnchorPane>

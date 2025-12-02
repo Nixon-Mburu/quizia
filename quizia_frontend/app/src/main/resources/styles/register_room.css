@@ -1,0 +1,156 @@
+/* ============================================
+   REGISTER ROOM PAGE - Modern Room Creation
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700;800&display=swap');
+
+.root {
+    -fx-background-color: #F5E6D3;
+    -fx-font-family: 'Gabarito', sans-serif;
+}
+
+.page-title {
+    -fx-font-size: 32px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #2C1810;
+    -fx-padding: 0;
+}
+
+.page-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #5C4A3A;
+    -fx-padding: 0 0 16 0;
+}
+
+/* Form Card Container */
+.form-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 20, 0, 0, 4);
+}
+
+/* Form Labels */
+.form-label {
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1E293B;
+    -fx-padding: 0;
+}
+
+/* Form Input Fields */
+.form-input {
+    -fx-font-size: 14px;
+    -fx-padding: 12px 14px;
+    -fx-background-color: #F8F9FB;
+    -fx-border-color: #E0E7FF;
+    -fx-border-width: 2px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-text-fill: #1E293B;
+}
+
+.form-input:focused {
+    -fx-border-color: #667eea;
+    -fx-background-color: #FFFFFF;
+    -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.2), 10, 0, 0, 2);
+}
+
+.form-input:hover {
+    -fx-border-color: #667eea;
+    -fx-background-color: #FFFFFF;
+}
+
+/* Checkbox Group */
+.checkbox-group {
+    -fx-padding: 12;
+    -fx-background-color: #F8FAFC;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-border-color: #E0E7FF;
+    -fx-border-width: 1px;
+}
+
+/* Form Checkboxes */
+.form-checkbox {
+    -fx-font-size: 14px;
+    -fx-text-fill: #1E293B;
+    -fx-padding: 8px 0;
+    -fx-font-weight: 500;
+}
+
+.form-checkbox .box {
+    -fx-border-color: #667eea;
+    -fx-border-width: 2px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-background-color: #FFFFFF;
+    -fx-padding: 5px;
+}
+
+.form-checkbox:selected .box {
+    -fx-background-color: linear-gradient(to bottom, #667eea, #5568d3);
+    -fx-border-color: #667eea;
+}
+
+.form-checkbox:hover .box {
+    -fx-border-color: #5568d3;
+}
+
+/* Button Styling */
+.btn-primary, .btn-success, .btn-secondary, .btn-ghost {
+    -fx-font-weight: 700;
+    -fx-font-size: 14px;
+    -fx-padding: 12px 24px;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-cursor: hand;
+}
+
+.btn-primary {
+    -fx-background-color: linear-gradient(to bottom, #667eea, #5568d3);
+    -fx-text-fill: #FFFFFF;
+    -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.35), 12, 0, 0, 3);
+}
+
+.btn-primary:hover {
+    -fx-background-color: linear-gradient(to bottom, #5568d3, #4556bc);
+    -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.5), 16, 0, 0, 4);
+}
+
+.btn-success {
+    -fx-background-color: linear-gradient(to bottom, #10B981, #059669);
+    -fx-text-fill: #FFFFFF;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.35), 12, 0, 0, 3);
+}
+
+.btn-success:hover {
+    -fx-background-color: linear-gradient(to bottom, #059669, #047857);
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.5), 16, 0, 0, 4);
+}
+
+.btn-secondary {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #667eea;
+    -fx-border-color: #667eea;
+    -fx-border-width: 2px;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: #EEF2FF;
+    -fx-border-color: #5568d3;
+    -fx-text-fill: #5568d3;
+}
+
+.btn-ghost {
+    -fx-background-color: transparent;
+    -fx-text-fill: #2C1810;
+    -fx-border-color: #2C1810;
+    -fx-border-width: 1.5px;
+}
+
+.btn-ghost:hover {
+    -fx-background-color: rgba(44, 24, 16, 0.1);
+}

@@ -1,0 +1,130 @@
+/* ============================================
+   AUTH PAGE - Modern Playful Login Screen
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700;800&display=swap');
+
+.root {
+    -fx-background-color: #F5E6D3;
+    -fx-font-family: 'Gabarito', sans-serif;
+}
+
+/* Logo */
+.logo-label {
+    -fx-font-size: 48px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #2C1810;
+    -fx-font-family: 'Gabarito', sans-serif;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 8, 0, 0, 2);
+}
+
+/* Tagline */
+.tagline-label {
+    -fx-font-size: 38px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #2C1810;
+    -fx-font-family: 'Gabarito', sans-serif;
+    -fx-padding: 0 0 8 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 8, 0, 0, 2);
+}
+
+.subtitle-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #5C4A3A;
+    -fx-font-weight: 500;
+    -fx-padding: 0 0 24 0;
+}
+
+/* Auth Card Container */
+.auth-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 24px;
+    -fx-border-radius: 24px;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 32, 0, 0, 6);
+    -fx-spacing: 16px;
+}
+
+/* Username field styling */
+.username-field {
+    -fx-font-size: 15px;
+    -fx-padding: 16px 18px;
+    -fx-pref-width: 380px;
+    -fx-pref-height: 55px;
+    -fx-background-radius: 12px;
+    -fx-background-color: #F8F9FB;
+    -fx-border-color: #E0E7FF;
+    -fx-border-width: 2px;
+    -fx-border-radius: 12px;
+    -fx-text-fill: #1E293B;
+    -fx-font-family: 'Segoe UI', sans-serif;
+}
+
+.username-field:focused {
+    -fx-border-color: #667eea;
+    -fx-background-color: #FFFFFF;
+    -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.3), 12, 0, 0, 2);
+}
+
+.username-field:hover {
+    -fx-border-color: #667eea;
+    -fx-background-color: #FFFFFF;
+}
+
+/* Create Room Button */
+.btn-create {
+    -fx-background-color: linear-gradient(to bottom, #667eea, #5568d3);
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: 700;
+    -fx-font-size: 17px;
+    -fx-padding: 16px 36px;
+    -fx-pref-width: 280px;
+    -fx-pref-height: 55px;
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+    -fx-border-width: 0;
+    -fx-cursor: hand;
+    -fx-font-family: 'Gabarito', sans-serif;
+    -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.4), 14, 0, 0, 5);
+}
+
+.btn-create:hover {
+    -fx-background-color: linear-gradient(to bottom, #5568d3, #4556bc);
+    -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.5), 20, 0, 0, 6);
+    -fx-padding: 16px 36px;
+}
+
+.btn-create:pressed {
+    -fx-background-color: linear-gradient(to bottom, #4556bc, #3547a5);
+    -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.25), 12, 0, 0, 2);
+}
+
+/* Join Room Button */
+.btn-join {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #667eea;
+    -fx-font-weight: 700;
+    -fx-font-size: 17px;
+    -fx-padding: 16px 36px;
+    -fx-pref-width: 280px;
+    -fx-pref-height: 55px;
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+    -fx-border-color: #667eea;
+    -fx-border-width: 2.5px;
+    -fx-cursor: hand;
+    -fx-font-family: 'Gabarito', sans-serif;
+    -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.3), 10, 0, 0, 3);
+}
+
+.btn-join:hover {
+    -fx-background-color: #EEF2FF;
+    -fx-border-color: #5568d3;
+    -fx-text-fill: #5568d3;
+}
+
+.btn-join:pressed {
+    -fx-background-color: #E0E7FF;
+}
+

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.ProgressBar?>
+<AnchorPane fx:id="root" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.quizia.frontend.controller.QuestionsController" stylesheets="@../styles/questions.css" styleClass="root">
+    <children>
+        <VBox spacing="20.0" AnchorPane.leftAnchor="30" AnchorPane.topAnchor="30" AnchorPane.rightAnchor="30" AnchorPane.bottomAnchor="30" style="-fx-padding: 0;">
+            <!-- Timer at Top -->
+            <HBox spacing="12" style="-fx-alignment: top-right; -fx-padding: 0 0 10 0;">
+                <Label text="Time Remaining:" styleClass="timer-label" />
+                <Label fx:id="timerLabel" text="10s" styleClass="timer-value" />
+            </HBox>
+            
+            <!-- Question Card on Beige Background -->
+            <VBox spacing="20" styleClass="question-card" style="-fx-padding: 40; -fx-background-color: #F5E6D3; -fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #E8D7C3; -fx-border-width: 2;">
+                <!-- Room and Topic Info -->
+                <HBox spacing="30" style="-fx-padding: 0 0 10 0;">
+                    <Label fx:id="roomLabel" text="Room: -" styleClass="info-label" />
+                    <Label fx:id="topicLabel" text="Topic: -" styleClass="info-label" />
+                </HBox>
+                
+                <!-- Question Text -->
+                <Label fx:id="questionText" text="Question will appear here" wrapText="true" styleClass="question-text" />
+                
+                <!-- Answer Options -->
+                <VBox spacing="12" style="-fx-padding: 20 0 0 0;">
+                    <RadioButton fx:id="optA" text="Option A" styleClass="option-button animated-option" />
+                    <RadioButton fx:id="optB" text="Option B" styleClass="option-button animated-option" />
+                    <RadioButton fx:id="optC" text="Option C" styleClass="option-button animated-option" />
+                    <RadioButton fx:id="optD" text="Option D" styleClass="option-button animated-option" />
+                </VBox>
+                
+                <!-- Navigation and Submit Buttons -->
+                <HBox spacing="12" style="-fx-padding: 20 0 0 0; -fx-alignment: center;">
+                    <Button fx:id="prevBtn" text="← Previous" onAction="#onPrevious" styleClass="btn-secondary" />
+                    <Button fx:id="nextBtn" text="Next →" onAction="#onNext" styleClass="btn-primary" />
+                    <Button fx:id="submitBtn" text="Submit Quiz" onAction="#onSubmit" styleClass="btn-success" />
+                </HBox>
+            </VBox>
+            
+            <!-- Back Button -->
+            <Button text="← Back to Topics" onAction="#onBackToTopics" styleClass="btn-ghost" />
+        </VBox>
+    </children>
+</AnchorPane>

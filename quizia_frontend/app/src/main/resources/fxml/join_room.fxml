@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.geometry.Insets?>
+<AnchorPane fx:id="root" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.quizia.frontend.controller.JoinRoomController" stylesheets="@../styles/join_room.css" styleClass="root">
+    <children>
+        <VBox spacing="20.0" AnchorPane.leftAnchor="40" AnchorPane.topAnchor="30" AnchorPane.rightAnchor="40" AnchorPane.bottomAnchor="30">
+            <!-- Beautiful Header Section -->
+            <VBox spacing="8" styleClass="header-section" style="-fx-padding: 0 0 20 0;">
+                <Label text="Discover Quiz Rooms" styleClass="page-title" style="-fx-font-size: 42px;" />
+                <Label text="Join a room and challenge your friends to an epic quiz battle" styleClass="page-subtitle" style="-fx-font-size: 18px;" />
+                <Label text="Select a room below to get started" styleClass="page-hint" style="-fx-font-size: 14px; -fx-padding: 8 0 0 0;" />
+            </VBox>
+            
+            <!-- Current Room Members Section (when in a room) -->
+            <VBox fx:id="currentMembersSection" spacing="8" style="-fx-padding: 16; -fx-background-color: #F0E6D2; -fx-background-radius: 12; -fx-border-color: #D4C4B0; -fx-border-width: 1;" managed="false" visible="false">
+                <Label text="Members in Room:" style="-fx-font-size: 14px; -fx-font-weight: 700; -fx-text-fill: #2C1810;" />
+                <FlowPane fx:id="currentMembersChips" hgap="8" vgap="8" />
+            </VBox>
+            
+            <!-- Cards Container with ScrollPane -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="cards-scroll-pane" style="-fx-background: transparent; -fx-background-color: transparent;">
+                <VBox fx:id="roomCardsContainer" spacing="16" style="-fx-padding: 4;">
+                    <!-- Room cards will be added here programmatically -->
+                </VBox>
+            </ScrollPane>
+            
+            <!-- Stylish Footer Buttons -->
+            <HBox spacing="16.0" alignment="CENTER_LEFT" style="-fx-padding: 24 0 0 0;">
+                <Button fx:id="backButton" text="← Back to Home" styleClass="btn-secondary" style="-fx-pref-width: 180px; -fx-pref-height: 50px; -fx-font-size: 15px;" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="roomCountLabel" text="" styleClass="room-count-label" style="-fx-font-size: 14px; -fx-text-fill: #5C4A3A;" />
+            </HBox>
+        </VBox>
+    </children>
+</AnchorPane>

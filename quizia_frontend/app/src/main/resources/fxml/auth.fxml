@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+
+<AnchorPane fx:id="root" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.quizia.frontend.controller.AuthController" stylesheets="@../styles/auth_new.css" styleClass="root">
+    <!-- Quizia Title Top Left -->
+    <Label text="Quizia" fx:id="logoLabel" styleClass="logo-label" layoutX="30" layoutY="30" AnchorPane.leftAnchor="30" AnchorPane.topAnchor="30" />
+
+    <!-- Centered Card using StackPane for centering -->
+    <StackPane prefWidth="900" prefHeight="600" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
+        <VBox fx:id="authCard" alignment="CENTER" spacing="22.0" styleClass="auth-card" style="-fx-padding: 60 70 60 70; -fx-max-width: 600;">
+            <!-- Tagline -->
+            <Label text="Build Rooms and Play" styleClass="tagline-label" style="-fx-font-size: 38px;" />
+            <Label text="Join friends and compete in amazing quizzes" styleClass="subtitle-label" style="-fx-font-size: 16px;" />
+            
+            <!-- Username field -->
+            <TextField fx:id="usernameField" promptText="Enter Your Username" styleClass="username-field" style="-fx-pref-width: 380px; -fx-pref-height: 55px; -fx-font-size: 15px;" />
+            
+            <!-- Action Buttons -->
+            <VBox spacing="16" style="-fx-padding: 30 0 0 0; -fx-alignment: center;">
+                <Button fx:id="createRoomBtn" text="Create Room" styleClass="btn-create" style="-fx-pref-width: 280px; -fx-pref-height: 55px; -fx-font-size: 17px;" onAction="#goToRegisterRoom" />
+                <Button fx:id="joinRoomBtn" text="Join Room" styleClass="btn-join" style="-fx-pref-width: 280px; -fx-pref-height: 55px; -fx-font-size: 17px;" onAction="#goToJoinRoom" />
+            </VBox>
+        </VBox>
+    </StackPane>
+</AnchorPane>

@@ -1,0 +1,150 @@
+/* ============================================
+   QUESTIONS PAGE - Quiz Interface
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700;800&display=swap');
+
+.root {
+    -fx-background-color: #F5E6D3;
+    -fx-font-family: 'Gabarito', sans-serif;
+}
+
+/* Timer styling */
+.timer-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #2C1810;
+    -fx-font-weight: 600;
+}
+
+.timer-value {
+    -fx-font-size: 24px;
+    -fx-text-fill: #FF6B6B;
+    -fx-font-weight: 800;
+}
+
+/* Question card styling */
+.question-card {
+    -fx-background-color: #F5E6D3;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-border-color: #E8D7C3;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 20, 0, 0, 4);
+}
+
+/* Info labels */
+.info-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #8B7355;
+    -fx-font-weight: 600;
+}
+
+/* Question text */
+.question-text {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #2C1810;
+    -fx-padding: 0;
+    -fx-wrap-text: true;
+    -fx-line-spacing: 4px;
+}
+
+/* Animated Option Buttons */
+.animated-option {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #D4C5B9;
+    -fx-border-width: 2px;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 16px 18px;
+    -fx-alignment: top-left;
+    -fx-font-size: 14px;
+    -fx-text-fill: #2C1810;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 6, 0, 0, 1);
+}
+
+.animated-option:hover {
+    -fx-border-color: #764ba2;
+    -fx-background-color: #FFFBF8;
+    -fx-effect: dropshadow(gaussian, rgba(118, 75, 162, 0.2), 12, 0, 0, 2);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+}
+
+.animated-option:selected {
+    -fx-border-color: #667eea;
+    -fx-background-color: linear-gradient(to right, #E0E7FF, #F3F4FF);
+    -fx-border-width: 2.5px;
+    -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.25), 12, 0, 0, 3);
+}
+
+/* State: Correct answer */
+.animated-option.correct {
+    -fx-background-color: linear-gradient(to right, #DCFCE7, #BBFB9B);
+    -fx-border-color: #10B981;
+    -fx-text-fill: #065F46;
+}
+
+/* State: Incorrect answer */
+.animated-option.incorrect {
+    -fx-background-color: linear-gradient(to right, #FEE2E2, #FCA5A5);
+    -fx-border-color: #EF4444;
+    -fx-text-fill: #991B1B;
+}
+
+/* Button Styling */
+.btn-primary, .btn-success, .btn-secondary, .btn-ghost {
+    -fx-font-weight: 700;
+    -fx-font-size: 14px;
+    -fx-padding: 12px 24px;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-cursor: hand;
+}
+
+.btn-primary {
+    -fx-background-color: linear-gradient(to bottom, #667eea, #5568d3);
+    -fx-text-fill: #FFFFFF;
+    -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.35), 12, 0, 0, 3);
+}
+
+.btn-primary:hover {
+    -fx-background-color: linear-gradient(to bottom, #5568d3, #4556bc);
+    -fx-effect: dropshadow(gaussian, rgba(102, 126, 234, 0.5), 16, 0, 0, 4);
+}
+
+.btn-success {
+    -fx-background-color: linear-gradient(to bottom, #10B981, #059669);
+    -fx-text-fill: #FFFFFF;
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.35), 12, 0, 0, 3);
+}
+
+.btn-success:hover {
+    -fx-background-color: linear-gradient(to bottom, #059669, #047857);
+    -fx-effect: dropshadow(gaussian, rgba(16, 185, 129, 0.5), 16, 0, 0, 4);
+}
+
+.btn-secondary {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #667eea;
+    -fx-border-color: #667eea;
+    -fx-border-width: 2px;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: #EEF2FF;
+    -fx-border-color: #5568d3;
+    -fx-text-fill: #5568d3;
+}
+
+.btn-ghost {
+    -fx-background-color: transparent;
+    -fx-text-fill: #2C1810;
+    -fx-border-color: #2C1810;
+    -fx-border-width: 1.5px;
+}
+
+.btn-ghost:hover {
+    -fx-background-color: rgba(44, 24, 16, 0.1);
+}

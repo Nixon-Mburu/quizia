@@ -1,0 +1,55 @@
+# Root .gitignore for Quizia Project
+
+# OS files
+.DS_Store
+*.swp
+*~
+.vscode/
+.idea/
+
+# Build artifacts (allow in subdirectories but ignore at root)
+*.jar
+*.deb
+*.exe
+*.msi
+*.zip
+*.tar.gz
+
+# Distribution files at root
+DISTRIBUTION_GUIDE.md
+LINUX_INSTALL.md
+WINDOWS_INSTALL.md
+*.nsi
+install.bat
+quizia.bat
+quizia.sh
+
+# IDE files
+*.iml
+*.iws
+*.ipr
+*.swp
+
+# Build directories at root
+build/
+dist/
+target/
+
+# Gradle files at root
+.gradle/
+gradle.properties
+
+# Local environment files
+.env
+.env.local
+
+# Temporary files
+tmp/
+temp/
+*.log
+
+# Configuration files that should not be committed
+quizia-config.properties
+
+# Database files
+*.db
